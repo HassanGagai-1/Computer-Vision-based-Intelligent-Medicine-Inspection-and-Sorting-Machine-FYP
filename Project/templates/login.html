@@ -5,7 +5,7 @@
     <link rel="icon" href="{{ url_for('static', filename='icon/favicon.ico') }}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://kit.fontawesome.com/3a44b96126.js" crossorigin="anonymous"></script>
 	<link rel="stylesheet"
 		href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" />
@@ -30,11 +30,11 @@
                                 Today is a new day. It's your day. You shape it. Sign in to start managing your projects.
                             </div>
                         </div>
-                        <form method="POST" action = "/login">
+                        <form method="POST" action = "/login" enctype="application/x-www-form-urlencoded">
                                 <label>Email</label>
-                                <input placeholder="Example@gmail.com" type="email" class="form-control my-2">
+                                <input name="email" type="email" class="form-control my-2" required>
                                 <label>Password</label> 
-                                <input type="password" placeholder="Enter password min 8 characters" class="form-control my-2">
+                                <input name="password" type="password" class="form-control my-2" required>
                                 <div>
                                     <a href="#" class="">forget password</a>
                                 </div>

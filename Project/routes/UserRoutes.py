@@ -1,34 +1,52 @@
 from flask import Flask, Blueprint, render_template, request, redirect, url_for, flash, session ,jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
-import psycopg2
-import services.UserServices as userService
+from werkzeug.security import generate_password_hash
+from services.UserService import UserService
+from flask import render_template
+
+user_bp = Blueprint('user', __name__)
+
+@user_bp.route('/welcome', methods=['GET'])
+def index():
+	return render_template('welcome.html')
 
 
-postgres = psycopg2.connect(database='postgres', user='postgres', password='12345', host='localhost', port='5432')
-user_bp = Blueprint('users', __name__)
-
-# @user_bp.route('/register', methods=['GET', 'POST'])
-# def signup():
+@user_bp.route('/register', methods=['POST','GET'])
+def register():
+    if request.method == 'GET':
+        return render_template('signup.html')
     
 
+    try:
+        # data = request.get_json()
+        firstname = request.form.get('firstname')   
+        lastname = request.form.get('lastname')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        # Register user via service
+        
+        UserService.register_user(firstname, lastname, email, password)
+        return redirect('/login')
+    except ValueError as e:
+        return render_template('signup.html', error=str(e)), 400
 
-@user_bp.route('/user', methods=['GET'])
-def get_notes():
-    users = userService.get_all_users()
-    users_list = [{'id': user.id, 'firstname': user.firstname, 'lastname': user.lastname, 'email': user.email, 'password': user.password} for user in users]
-    return jsonify({'notes': users_list})
+@user_bp.route('/login', methods=['POST','GET'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    
+    print(f"Request Form Data: {request.form}")
+
+    email = request.form.get('email')
+    password = request.form.get('password')
+
+    print(f" User route Email: {email}, Password route: {password}")
 
 
-@user_bp.route('/createUser', methods=['POST'])
-def create_note_route():
-    data = request.get_json()
-    firstname = data.get('firstname')
-    lastname = data.get('lastname')
-    email = data.get('email')
-    password = data.get('password')
-
-    if not firstname or not lastname or not email or not password:
-        return jsonify({'error': 'Name and description are required'}), 400
-
-    new_user_id = insert_user(firstname, lastname, email, password)
-    return jsonify({'message': 'Note created successfully', 'note_id': new_user_id})
+    if not email or not password:
+        return render_template('login.html', error='Invalid email or password'), 400
+    
+    try:
+        user = UserService.login_user(request.form.get('email'), request.form.get('password'))
+        return redirect('/welcome')
+    except ValueError as e:
+        return render_template('login.html', error=str(e)), 400
