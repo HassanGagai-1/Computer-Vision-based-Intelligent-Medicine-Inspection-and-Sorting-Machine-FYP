@@ -5,9 +5,9 @@ from flask import render_template
 
 user_bp = Blueprint('user', __name__)
 
-@user_bp.route('/welcome', methods=['GET'])
+@user_bp.route('/dashboard', methods=['GET'])
 def index():
-	return render_template('welcome.html')
+	return render_template('dashboard.html')
 
 
 @user_bp.route('/register', methods=['POST','GET'])
@@ -33,20 +33,14 @@ def register():
 def login():
     if request.method == 'GET':
         return render_template('login.html')
-    
-    print(f"Request Form Data: {request.form}")
-
     email = request.form.get('email')
     password = request.form.get('password')
-
-    print(f" User route Email: {email}, Password route: {password}")
-
-
+    
     if not email or not password:
         return render_template('login.html', error='Invalid email or password'), 400
-    
+
     try:
         user = UserService.login_user(request.form.get('email'), request.form.get('password'))
-        return redirect('/welcome')
+        return redirect('/dashboard')
     except ValueError as e:
         return render_template('login.html', error=str(e)), 400

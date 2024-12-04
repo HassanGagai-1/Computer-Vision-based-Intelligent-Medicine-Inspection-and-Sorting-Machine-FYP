@@ -1,6 +1,5 @@
 from models.users import User
 from dal.UserRepository import UserRepository
-from werkzeug.security import generate_password_hash, check_password_hash
 from argon2 import PasswordHasher
 
 
