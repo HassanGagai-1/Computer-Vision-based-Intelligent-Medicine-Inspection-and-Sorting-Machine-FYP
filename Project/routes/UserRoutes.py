@@ -5,10 +5,13 @@ from flask import render_template
 
 user_bp = Blueprint('user', __name__)
 
+@user_bp.route('/', methods=['GET'])
+def home():
+    return render_template('signup.html')
+
 @user_bp.route('/dashboard', methods=['GET'])
 def index():
 	return render_template('dashboard.html')
-
 
 @user_bp.route('/register', methods=['POST','GET'])
 def register():
@@ -35,12 +38,13 @@ def login():
         return render_template('login.html')
     email = request.form.get('email')
     password = request.form.get('password')
-    
+
+
     if not email or not password:
         return render_template('login.html', error='Invalid email or password'), 400
 
     try:
-        user = UserService.login_user(request.form.get('email'), request.form.get('password'))
+        UserService.login_user(request.form.get('email'), request.form.get('password'))
         return redirect('/dashboard')
     except ValueError as e:
         return render_template('login.html', error=str(e)), 400
