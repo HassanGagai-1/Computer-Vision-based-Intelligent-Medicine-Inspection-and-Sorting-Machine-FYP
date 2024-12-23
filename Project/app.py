@@ -1,21 +1,19 @@
-from flask import Flask
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from routes.UserRoutes import user_bp
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from extensions import db
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
+from flask import Flask
+from datetime import timedelta
 
 def create_app():
-    
-    load_dotenv()
-    
+    load_dotenv(find_dotenv())
     app = Flask(__name__)
-    
-    app.config.from_prefixed_env()
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12345@localhost/postgres'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config.update(
+    SESSION_COOKIE_HTTPONLY=True, # Prevents JavaScript from reading the cookie
+    SESSION_COOKIE_SECURE=False,  # True if using HTTPS
+    )
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
 
+    app.config.from_prefixed_env()
     
     db.init_app(app)
 
@@ -26,4 +24,3 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     app.run(debug=True)
-    

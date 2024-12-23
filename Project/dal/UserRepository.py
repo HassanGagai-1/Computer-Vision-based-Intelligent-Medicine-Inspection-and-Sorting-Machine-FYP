@@ -5,7 +5,10 @@ class UserRepository:
     @staticmethod
     def find_by_email(email):
         user = User.query.filter_by(email=email).first()
-        print(f"User found for email {email}: {user}")
+        if user:
+            print(f"User found for email {email}: {user.firstname}")
+        else:
+            print(f"No user found for email {email}")
         return user
 
     @staticmethod

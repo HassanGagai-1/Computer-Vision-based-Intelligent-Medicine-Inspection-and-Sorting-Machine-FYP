@@ -2,7 +2,6 @@ from models.users import User
 from dal.UserRepository import UserRepository
 from argon2 import PasswordHasher
 
-
 ph = PasswordHasher()
 
 class UserService:
@@ -21,10 +20,9 @@ class UserService:
         user = UserRepository.find_by_email(email)
         if not user:
             raise ValueError("Invalid email or password")
-        print(f"User found: {user}")
+        print(f"User found: {user.id}")
         
         if ph.verify(user.password, password):
             return user
         else:
             raise ValueError("Invalid email or password")
-
