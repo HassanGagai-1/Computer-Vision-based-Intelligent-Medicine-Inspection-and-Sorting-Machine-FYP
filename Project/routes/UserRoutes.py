@@ -23,7 +23,6 @@ def register():
     if request.method == 'GET':
         return render_template('signup.html')
     try:
-        # data = request.get_json()
         firstname = request.form.get('firstname')   
         lastname = request.form.get('lastname')
         email = request.form.get('email')
@@ -31,6 +30,7 @@ def register():
         # Register user via service
         
         UserService.register_user(firstname, lastname, email, password)
+        flash("You have successfully logged in")
         return redirect('/login')
     except ValueError as e:
         return render_template('signup.html', error=str(e)), 400
@@ -42,10 +42,11 @@ def login():
         return render_template('login.html')
     email = request.form.get('email')
     password = request.form.get('password')
-    
+        
     logger.info('User login attempt')
 
     if not email or not password:
+        flash('Invalid email or password', 'error')
         return render_template('login.html', error='Invalid email or password'), 400
 
     try:
@@ -53,10 +54,12 @@ def login():
         session.permanent = True
         session['user_id'] = user.id
         return redirect('/dashboard')
-    except ValueError as e:
-        return render_template('login.html', error=str(e)), 400
+    except ValueError:
+        flash('Invalid credentials', 'error')
+        return redirect('/login')
     
 @user_bp.route('/logout', methods=['GET'])
 def logout():
-    session.clear()
+    session.pop("user_id",None)
+    flash("You have been successfully logged out!", "Info")
     return redirect('/login')
