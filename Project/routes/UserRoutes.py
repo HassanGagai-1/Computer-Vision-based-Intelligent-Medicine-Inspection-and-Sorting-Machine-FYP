@@ -1,7 +1,8 @@
 from flask import Flask, Blueprint, render_template, request, redirect, url_for, flash, session ,jsonify
 from services.UserService import UserService
 from flask import render_template
-
+import logging
+logger = logging.getLogger(__name__)
 user_bp = Blueprint('user', __name__)
 
 @user_bp.route('/', methods=['GET'])
@@ -10,6 +11,7 @@ def home():
 
 @user_bp.route('/dashboard', methods=['GET'])
 def dashboard():
+    
     if 'user_id' not in session:
         return redirect('/login')
     else:
@@ -17,6 +19,7 @@ def dashboard():
 
 @user_bp.route('/register', methods=['POST','GET'])
 def register():
+    logger.debug("UserRoutes.register endpoint called")
     if request.method == 'GET':
         return render_template('signup.html')
     try:
@@ -34,10 +37,14 @@ def register():
 
 @user_bp.route('/login', methods=['POST','GET'])
 def login():
+    logger.debug("UserRoutes.login endpoint called")
     if request.method == 'GET':
         return render_template('login.html')
     email = request.form.get('email')
     password = request.form.get('password')
+    
+    logger.info('User login attempt')
+
     if not email or not password:
         return render_template('login.html', error='Invalid email or password'), 400
 

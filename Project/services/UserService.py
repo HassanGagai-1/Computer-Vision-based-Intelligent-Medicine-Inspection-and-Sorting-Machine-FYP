@@ -1,8 +1,9 @@
 from models.users import User
 from dal.UserRepository import UserRepository
 from argon2 import PasswordHasher
-
+import logging
 ph = PasswordHasher()
+logger = logging.getLogger(__name__)
 
 class UserService:
     
@@ -17,12 +18,13 @@ class UserService:
 
     @staticmethod
     def login_user(email,password):
+        logger.info(f"Attempting to find user with email: {email}")
         user = UserRepository.find_by_email(email)
         if not user:
             raise ValueError("Invalid email or password")
-        print(f"User found: {user.id}")
+        logger.info(f"User found via email: {user.firstname + ' ' + user.lastname}")
         
+        logger.info(f"Attempting to verify password for {user.firstname + ' ' + user.lastname}")
         if ph.verify(user.password, password):
             return user
-        else:
-            raise ValueError("Invalid email or password")
+        return ValueError("Invalid email or password")
