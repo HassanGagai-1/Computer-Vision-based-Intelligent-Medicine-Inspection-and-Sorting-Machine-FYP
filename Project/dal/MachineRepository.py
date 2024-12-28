@@ -13,6 +13,10 @@ class MachineRepository:
         db.session.commit()
 
     @staticmethod
+    def find_all():
+        return Machine.query.all()
+    
+    @staticmethod
     def find_by_id(machine_id):
         return Machine.query.get(machine_id)
     

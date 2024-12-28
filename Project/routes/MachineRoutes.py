@@ -18,3 +18,14 @@ def addMachine():
         return redirect('/dashboard')
     except ValueError as e:
         return render_template('dashboard.html', error=str(e)), 400
+    
+
+@machine_bp.route('/api/getMachines', methods=['GET'])
+def getMachines():
+    
+    logger.debug("Get machines endpoint called")
+    machines = MachineService.get_machines()
+    
+    machine_dicts = [machine.to_dict() for machine in machines]
+    
+    return jsonify(machine_dicts),200

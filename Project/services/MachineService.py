@@ -15,6 +15,13 @@ class MachineService:
         MachineRepository.create_machine(machine)
         return machine
         
+    @staticmethod
+    def get_machines():
+        machine = MachineRepository.find_all()
+        if not machine:
+            raise ValueError("Machine not found")
+        return machine
+    
     
     @staticmethod
     def register_machine(machine_code, machine_password, created_by):
