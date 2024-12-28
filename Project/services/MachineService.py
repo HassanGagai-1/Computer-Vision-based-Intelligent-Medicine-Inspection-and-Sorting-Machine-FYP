@@ -8,6 +8,15 @@ logger = logging.getLogger(__name__)
 class MachineService:
     
     @staticmethod
+    def add_machine(machine_code, machine_name):
+        if MachineRepository.find_by_machine_code(machine_code):
+            raise ValueError("Machine already exists")
+        machine = Machine(machine_code, machine_name)
+        MachineRepository.create_machine(machine)
+        return machine
+        
+    
+    @staticmethod
     def register_machine(machine_code, machine_password, created_by):
         if MachineRepository.find_by_machine_code(machine_code):
             raise ValueError("Machine already exists")

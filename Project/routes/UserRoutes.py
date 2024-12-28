@@ -56,7 +56,7 @@ def login():
         return redirect('/dashboard')
     except ValueError:
         flash('Invalid credentials', 'error')
-        return redirect('/login')
+        return render_template('login.html', error='Invalid email or password'), 400
     
 @user_bp.route('/logout', methods=['GET'])
 def logout():

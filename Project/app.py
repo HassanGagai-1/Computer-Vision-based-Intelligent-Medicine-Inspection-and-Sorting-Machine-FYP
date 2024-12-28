@@ -1,5 +1,6 @@
 from dotenv import load_dotenv, find_dotenv
 from routes.UserRoutes import user_bp
+from routes.MachineRoutes import machine_bp
 from extensions import db
 from flask import Flask
 from models.users import User  
@@ -29,7 +30,8 @@ def create_app():
     with app.app_context():
         db.create_all()  # Create tables
 
-    app.register_blueprint(user_bp)    
+    app.register_blueprint(user_bp)  
+    app.register_blueprint(machine_bp)  
     return app
     
 if __name__ == '__main__':
