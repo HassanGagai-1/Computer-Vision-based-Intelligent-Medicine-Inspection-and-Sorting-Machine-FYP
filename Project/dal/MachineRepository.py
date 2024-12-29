@@ -8,6 +8,11 @@ class MachineRepository:
         return machine
 
     @staticmethod
+    def find_machine_password(machine_password):
+        machine = Machine.query.filter_by(machine_password=machine_password).first()
+        return machine
+    
+    @staticmethod
     def create_machine(machine):
         db.session.add(machine)
         db.session.commit()

@@ -94,14 +94,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <form id = "MachinePasswordForm" method="POST" action = "/api/authorizeUser" enctype="application/x-www-form-urlencoded">
+                        <div class="form-group">
+                            <label>Machine Password</label>
+                            <input name="machine_password" type="password" class="form-control my-2" required>
+                        </div>
+                    </form>
                     <form id = "MachineForm" method="POST" action = "/addMachine" enctype="application/x-www-form-urlencoded">
                         
                         <label>Machine Code</label> 
                         <input name="machine_code" type="text" class="form-control my-2" required>
-                        
-                        <label  class="form-label">Machine Password</label>
-                        <input name="machine_password" type="password" class="form-control my-2" required>
-                        
+                                                
                         <label>Created by</label> 
                         <input name="created_by" type="text" class="form-control my-2" required>
                         
@@ -137,7 +140,6 @@
             // Suppose you have a table body <tbody id="machines-table-body">
             const tableBody = document.getElementById('machines-table-body');
             if (!tableBody) return;
-    
             // Clear existing rows
             tableBody.innerHTML = '';
     
@@ -154,7 +156,7 @@
                     <td>
                         <!-- Some button or link to do further actions, for example: -->
                         <button class="btn btn-primary">
-                          Generate Report
+                            Generate Report
                         </button>
                     </td>
                 `;
@@ -163,7 +165,6 @@
         }
     
     
-        // Automatically fetch machines when the page loads
         window.addEventListener('DOMContentLoaded', fetchMachines);
     </script>
     

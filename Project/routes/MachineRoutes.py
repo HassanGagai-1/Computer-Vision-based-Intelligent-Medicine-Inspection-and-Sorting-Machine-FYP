@@ -12,9 +12,8 @@ def addMachine():
         return render_template('dashboard.html')
     try:
         machine_code = request.form.get('machine_code')
-        machine_password = request.form.get('machine_password')
         created_by = request.form.get('created_by')
-        MachineService.register_machine(machine_code, machine_password,created_by)
+        MachineService.register_machine(machine_code,created_by)
         return redirect('/dashboard')
     except ValueError as e:
         return render_template('dashboard.html', error=str(e)), 400
@@ -29,3 +28,12 @@ def getMachines():
     machine_dicts = [machine.to_dict() for machine in machines]
     
     return jsonify(machine_dicts),200
+
+@machine_bp.route('/api/authorizeUser', methods=['POST','GET'])
+def authorizeUser():
+    logger.debug("Authorize user endpoint called")
+    if request.method == 'GET':
+        return render_template('dashboard.html')
+    try:
+        machine_password = request.form.get('machine_password')
+        MachineService.match_machine_password(machine_password)

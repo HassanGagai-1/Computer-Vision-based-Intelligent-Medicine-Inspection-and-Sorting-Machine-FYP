@@ -7,13 +7,6 @@ logger = logging.getLogger(__name__)
 
 class MachineService:
     
-    @staticmethod
-    def add_machine(machine_code, machine_name):
-        if MachineRepository.find_by_machine_code(machine_code):
-            raise ValueError("Machine already exists")
-        machine = Machine(machine_code, machine_name)
-        MachineRepository.create_machine(machine)
-        return machine
         
     @staticmethod
     def get_machines():
@@ -24,11 +17,10 @@ class MachineService:
     
     
     @staticmethod
-    def register_machine(machine_code, machine_password, created_by):
+    def register_machine(machine_code, created_by):
         if MachineRepository.find_by_machine_code(machine_code):
             raise ValueError("Machine already exists")
-        hashed_password = ph.hash(machine_password)
-        machine = Machine(machine_code, hashed_password, created_by)
+        machine = Machine(machine_code, created_by)
         MachineRepository.create_machine(machine)
         return machine
 
@@ -44,3 +36,10 @@ class MachineService:
         if ph.verify(machine.machine_password, machine_password):
             return machine
         return ValueError("Invalid machine_code or machine_password")
+    
+    @staticmethod
+    def match_machine_password(machine_password):
+        machine = MachineRepository.find_machine_password(machine_password)
+        if not machine:
+            raise ValueError("Machine not found")
+        return machine
