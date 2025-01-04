@@ -4,23 +4,22 @@ from extensions import db
 class MachineRepository:
     @staticmethod
     def find_by_machine_code(machine_code):
-        machine = Machine.query.filter_by(machine_code=machine_code).first()
-        return machine
+        return Machine.query.filter_by(machine_code=machine_code).first()
 
     @staticmethod
     def find_machine_password(machine_password):
-        machine = Machine.query.filter_by(machine_password=machine_password).first()
-        return machine
-    
+        return Machine.query.filter_by(machine_password=machine_password).first()
+
     @staticmethod
     def create_machine(machine):
         db.session.add(machine)
         db.session.commit()
 
     @staticmethod
-    def find_all():
-        return Machine.query.all()
-    
+    def create_user_machine(user_machine):
+        db.session.add(user_machine)
+        db.session.commit()
+
     @staticmethod
     def find_by_id(machine_id):
         return Machine.query.get(machine_id)

@@ -12,6 +12,12 @@ class UserRepository:
         return user
 
     @staticmethod
+    def reset_token(user,reset_token,reset_token_expiry):
+        user.reset_token = reset_token
+        user.reset_token_expiry = reset_token_expiry
+        db.session.commit()
+    
+    @staticmethod
     def create_user(user):
         db.session.add(user)
         db.session.commit()

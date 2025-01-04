@@ -1,0 +1,37 @@
+
+from flask import Flask, Blueprint, render_template, request, redirect, url_for, flash, session ,jsonify
+from services.MachineService import MachineService
+from services.UserMachineService import UserMachineService
+from services.ResultService import ResultService
+from flask import render_template
+import logging
+from decorators.totp import totp_required
+from models.users import User
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from flask import send_file
+
+logger = logging.getLogger(__name__)
+user_machine_bp = Blueprint('User_machine', __name__)
+
+
+@user_machine_bp.route('/api/getUserMachines', methods=['GET'])
+def getMachines():
+    
+    logger.debug("Get machines endpoint called")
+    
+    current_user_id = session.get('user_id')
+    
+    User = UserMachineService.get_user_machines(current_user_id)
+    
+    if not User:
+        flash("Please log in first.", "error")
+        logger.debug("No user logged in")
+        return redirect('/login')
+    
+    user_machines = User.machines
+    
+    machine_dicts = [m.to_dict() for m in user_machines]
+    
+    return jsonify(machine_dicts),200
+

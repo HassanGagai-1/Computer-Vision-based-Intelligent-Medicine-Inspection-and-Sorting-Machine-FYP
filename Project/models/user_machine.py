@@ -5,7 +5,6 @@ class UserMachine(db.Model):
     
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    
     machine_id = db.Column(db.Integer(), db.ForeignKey('machines.id', ondelete='CASCADE'), nullable=False)
     
     def __repr__(self):

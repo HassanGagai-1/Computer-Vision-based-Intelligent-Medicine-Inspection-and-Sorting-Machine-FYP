@@ -1,39 +1,30 @@
-from flask import Flask, Blueprint, render_template, request, redirect, url_for, flash, session ,jsonify
+from flask import Blueprint, render_template, request, redirect, flash, session
 from services.MachineService import MachineService
 from flask import render_template
 import logging
+from decorators.totp import totp_required
+
 logger = logging.getLogger(__name__)
 machine_bp = Blueprint('machine', __name__)
 
 @machine_bp.route('/addMachine', methods=['GET','POST'])
+@totp_required
 def addMachine():
     logger.debug("Add machine endpoint called")
     if request.method == 'GET':
         return render_template('dashboard.html')
+    machine_code = request.form.get('machine_code')
+    created_by = request.form.get('created_by')
+    current_user_id = session.get('user_id')
+
+    if not current_user_id:
+        flash("Please log in first.", "error")
+        return redirect('/login')
     try:
-        machine_code = request.form.get('machine_code')
-        created_by = request.form.get('created_by')
-        MachineService.register_machine(machine_code,created_by)
-        return redirect('/dashboard')
+        logger.debug("Register machine")
+
+        MachineService.register_machine(machine_code,created_by,current_user_id)
+        flash("Machine added successfully!", "success")
     except ValueError as e:
-        return render_template('dashboard.html', error=str(e)), 400
-    
-
-@machine_bp.route('/api/getMachines', methods=['GET'])
-def getMachines():
-    
-    logger.debug("Get machines endpoint called")
-    machines = MachineService.get_machines()
-    
-    machine_dicts = [machine.to_dict() for machine in machines]
-    
-    return jsonify(machine_dicts),200
-
-@machine_bp.route('/api/authorizeUser', methods=['POST','GET'])
-def authorizeUser():
-    logger.debug("Authorize user endpoint called")
-    if request.method == 'GET':
-        return render_template('dashboard.html')
-    try:
-        machine_password = request.form.get('machine_password')
-        MachineService.match_machine_password(machine_password)
+        flash(str(e), "error")
+    return redirect('/dashboard')
