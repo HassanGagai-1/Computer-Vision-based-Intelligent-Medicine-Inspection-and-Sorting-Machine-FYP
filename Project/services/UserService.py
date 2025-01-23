@@ -2,21 +2,26 @@ from models.users import User
 from dal.UserRepository import UserRepository
 from argon2 import PasswordHasher
 import logging
+import resend
 from flask import flash
 import secrets
+from itsdangerous import URLSafeTimedSerializer as Serializer
 import datetime
+import os
 from extensions import mail
 from flask_mail import Message
 from flask import url_for
 ph = PasswordHasher()
 logger = logging.getLogger(__name__)
 from argon2.exceptions import VerifyMismatchError
-
+import sendgrid
+from sendgrid.helpers.mail import (From, HtmlContent, Mail, PlainTextContent,
+Subject, To)
 class UserService:
     
     @staticmethod
     def register_user(firstname, lastname, email, password):
-        if UserRepository.find_by_email(email):
+        if UserRepository.find_by_email(email):     
             raise ValueError("Email already exists")
         hashed_password = ph.hash(password)
         user = User(firstname, lastname, email, hashed_password)
@@ -37,7 +42,23 @@ class UserService:
                 return user
         except VerifyMismatchError:
             raise ValueError("Invalid email or password")
-        
+    
+    @staticmethod
+    def update_user(user_id, firstname, lastname, email):
+        user = UserRepository.find_by_id(user_id)
+        if user:
+            UserRepository.update_user_detail(user, firstname, lastname, email)
+        else:
+            raise ValueError("User not found")
+    
+    @staticmethod
+    def changepassword(user_mail, new_password):
+        user = UserRepository.find_by_email(user_mail)
+        if user:
+            hashed_password = ph.hash(new_password)
+            UserRepository.update_user(user.email,hashed_password)
+        else:
+            raise ValueError("User not found")
         
     @staticmethod
     def forget_password(email):
@@ -73,3 +94,39 @@ class UserService:
     @staticmethod
     def get_user_profile(user_id):
         return UserRepository.find_by_id(user_id)
+    
+    @staticmethod
+    def get_user_email_profile(email):
+        return UserRepository.find_by_email(email)
+    
+    @staticmethod
+    def get_secret_token(user_data_json):
+        serial = Serializer(os.getenv('FLASK_SECRET_KEY', 'fallbacksecret'))
+        # token = serial.dumps({'user_id': f'{user_id}'})
+        token = serial.dumps(user_data_json)
+        print('Token:', token)
+        return token
+    
+    @staticmethod
+    def send_email(useremail, html_subject ,html_content):
+        FROM_EMAIL = 'hassangagai55@gmail.com'
+        EMAIL_SUBJECT = html_subject
+        HTML_CONTENT = html_content
+        
+        sg = sendgrid.SendGridAPIClient(api_key=os.getenv('FLASK_SENDGRID_API_KEY'))
+        message = Mail(
+            from_email=From(FROM_EMAIL),
+            to_emails=To(useremail),
+            subject=Subject(EMAIL_SUBJECT),
+            html_content=HtmlContent(HTML_CONTENT)
+        )
+        try:
+            response = sg.send(message)
+            print(response)
+            return print({'message': 'Email sent successfully', 'response': response.status_code})
+        except Exception as e:
+            return print({'message': 'Failed to send email', 'error': str(e)})
+        
+    @staticmethod
+    def delete_user(user):
+        UserRepository.delete_user(user)

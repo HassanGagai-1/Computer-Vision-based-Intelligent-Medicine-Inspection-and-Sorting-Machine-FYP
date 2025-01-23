@@ -24,13 +24,25 @@ class UserRepository:
 
     @staticmethod
     def find_by_id(user_id):
-        return User.query.get(user_id)
+        User =  User.query.get(user_id)
+        if User:
+            print(f"User found for id {user_id}: {User.email}")
+            return User
+        else:
+            print(f"No user found for id {user_id}")
     
     @staticmethod
-    def update_user(user):
-        db.session.update(user)
+    def update_user_detail(user, firstname, lastname, email):
+        user.firstname = firstname
+        user.lastname = lastname
+        user.email = email
         db.session.commit()
     
+    @staticmethod
+    def update_user(user_mail, hashed_password ):
+        db.session.query(User).filter_by(email=user_mail).update({'password': hashed_password})
+        db.session.commit()
+        
     @staticmethod
     def delete_user(user):
         db.session.delete(user)

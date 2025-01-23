@@ -20,6 +20,7 @@ def generate_qr_code_image(totp_uri):
     img.save(buf, format='PNG')
     buf.seek(0)
     return buf
+
 def verify_totp_code(secret, code):
     """Verify a TOTP code against a given secret."""
     totp = pyotp.TOTP(secret)

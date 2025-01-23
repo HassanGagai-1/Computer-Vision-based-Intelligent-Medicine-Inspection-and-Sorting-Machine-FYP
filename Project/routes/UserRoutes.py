@@ -6,7 +6,8 @@ import logging
 from extensions import db
 from services.totp_service import generate_totp_secret, get_totp_uri, generate_qr_code_image,verify_totp_code
 import datetime
-
+import os
+from itsdangerous import URLSafeTimedSerializer as Serializer
 
 logger = logging.getLogger(__name__)
 user_bp = Blueprint('user', __name__)
@@ -19,7 +20,7 @@ def home():
 def dashboard():
     print("Current session:", session)
     if 'user_id' not in session:
-        return redirect('/login')
+        return redirect(url_for('user.login'))
     else:
 	    return render_template('dashboard.html')
 
@@ -35,7 +36,7 @@ def register():
         password = request.form.get('password')
         
         UserService.register_user(firstname, lastname, email, password)
-        return redirect('/login')
+        return redirect(url_for('user.login'))
     except ValueError as e:
         return render_template('signup.html', error=str(e)), 400
 
@@ -65,37 +66,276 @@ def login():
 def logout():
     session.clear()
     flash("You have been successfully logged out!", "Info")
-    return redirect('/login')
+    return redirect(url_for('user.login'))
 
-@user_bp.route("/api/forget-password", methods=['GET', 'POST'])
-def forget_password():
-    logger.debug("Forget Password API called")
-    if request.method == 'GET':
-        return render_template('forget-password.html')
+@user_bp.route('/forgetPassword', methods=['GET', 'POST'])
+def forgetPass():
     if request.method == 'POST':
-        email = request.form.get('email')
-        UserService.forget_password(email)
+      
+        Uemail = request.form.get("username", False)
+        print("User mail is", Uemail)
+        userData = UserService.get_user_email_profile(Uemail)
         
-        flash('Password reset instructions have been sent to your email.', 'password_reset')
-        return render_template('forget-password.html')
+        print("JABBA: ",userData)
+        if userData:
+            if userData.email == Uemail:
+                user_data = {
+                    'user_id': Uemail,
+                }
 
-@user_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
-def reset_password(token):
-    user = User.query.filter_by(reset_token=token).first()
+                token   = UserService.get_secret_token(user_data)
+                # print("HTML Content:", HTML_CONTENT)
+                reset_url = url_for('user.resetPass', token=token, _external=True, _scheme='http')
+                # send_email(Uemail, 'Password Reset', HTML_CONTENT)
+                HTML_CONTENT = f'''
+                    <html>
+                    <head>
+                        <title></title>
+                        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+                        <style type="text/css">
+                            /* FONTS */
+                            @media screen {{
+                                @font-face {{
+                                    font-family: 'Lato';
+                                    font-style: normal;
+                                    font-weight: 400;
+                                    src: local('Lato Regular'), local('Lato-Regular'),
+                                    url(https://fonts.gstatic.com/s/lato/v11/qIIYRU-oROkIk8vfvxw6QvesZW2xOQ-xsNqO47m55DA.woff) format('woff');
+                                }}
+                                @font-face {{
+                                    font-family: 'Lato';
+                                    font-style: normal;
+                                    font-weight: 700;
+                                    src: local('Lato Bold'), local('Lato-Bold'),
+                                    url(https://fonts.gstatic.com/s/lato/v11/qdgUG4U09HnJwhYI-uK18wLUuEpTyoUstqEm5AMlJo4.woff) format('woff');
+                                }}
+                                @font-face {{
+                                    font-family: 'Lato';
+                                    font-style: italic;
+                                    font-weight: 400;
+                                    src: local('Lato Italic'), local('Lato-Italic'),
+                                    url(https://fonts.gstatic.com/s/lato/v11/RYyZNoeFgb0l7W3Vu1aSWOvvDin1pK8aKteLpeZ5c0A.woff) format('woff');
+                                }}
+                                @font-face {{
+                                    font-family: 'Lato';
+                                    font-style: italic;
+                                    font-weight: 700;
+                                    src: local('Lato Bold Italic'), local('Lato-BoldItalic'),
+                                    url(https://fonts.gstatic.com/s/lato/v11/HkF_qI1x_noxlxhrhMQYELO3LdcAZYWl9Si6vvxL-qU.woff) format('woff');
+                                }}
+                            }}
+                            /* CLIENT-SPECIFIC STYLES */
+                            body, table, td, a {{
+                                -webkit-text-size-adjust: 100%;
+                                -ms-text-size-adjust: 100%;
+                            }}
+                            table, td {{
+                                mso-table-lspace: 0pt;
+                                mso-table-rspace: 0pt;
+                            }}
+                            img {{
+                                -ms-interpolation-mode: bicubic;
+                            }}
+                            /* RESET STYLES */
+                            img {{
+                                border: 0;
+                                height: auto;
+                                line-height: 100%;
+                                outline: none;
+                                text-decoration: none;
+                            }}
+                            table {{
+                                border-collapse: collapse !important;
+                            }}
+                            body {{
+                                height: 100% !important;
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                width: 100% !important;
+                            }}
+                            /* iOS BLUE LINKS */
+                            a[x-apple-data-detectors] {{
+                                color: inherit !important;
+                                text-decoration: none !important;
+                                font-size: inherit !important;
+                                font-family: inherit !important;
+                                font-weight: inherit !important;
+                                line-height: inherit !important;
+                            }}
+                            /* ANDROID CENTER FIX */
+                            div[style*="margin: 16px 0;"] {{
+                                margin: 0 !important;
+                            }}
+                        </style>
+                    </head>
+                    <body style="background-color: #f4f4f4; margin: 0 !important; padding: 0 !important;">
+                        <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: 'Lato', Helvetica, Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">Hi!</div>
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#C62B5B" align="center">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="center" valign="top" style="padding: 40px 10px 40px 10px;">
+                                                        <a href="https://pifs.lts.com.fj" target="_blank"></a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td bgcolor="#C62B5B" align="center" style="padding: 0px 10px 0px 10px;">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                            <tbody>
+                                                <tr>
+                                                    <td bgcolor="#ffffff" align="center" valign="top" style="padding: 40px 20px 20px 20px; border-radius: 4px 4px 0px 0px; color: #111111; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 48px; font-weight: 400; letter-spacing: 4px; line-height: 48px;">
+                                                        <h1 style="font-size: 32px; font-weight: 400; margin: 0;">Forgot Your Password?</h1>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td bgcolor="#f4f4f4" align="center" style="padding: 0px 10px 0px 10px;">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                            <tbody>
+                                                <tr>
+                                                    <td bgcolor="#ffffff" align="left" style="padding: 20px 30px 40px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
+                                                        <p style="margin: 0;">Hey {Uemail},<br><br>Please tap the button below or click here to change your password.<br><br>If you didn't request to reset the password, don't worry. Just ignore this email and the link will expire on its own.<br><br>Have a nice day.<br>Stay Safe!<br></p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td bgcolor="#ffffff" align="left">
+                                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td bgcolor="#ffffff" align="center" style="padding: 20px 30px 60px 30px;">
+                                                                        <table border="0" cellspacing="0" cellpadding="0">
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td align="center" style="border-radius: 3px;" bgcolor="#C62B5B">
+                                                                                    <a href="{reset_url}" target="_blank" style="font-size: 20px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 15px 25px; border-radius: 2px; border: 1px solid #C62B5B; display: inline-block;">
+                                                                                    Reset Password</a>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td bgcolor="#f4f4f4" align="center" style="padding: 16px 10px 0px 10px;">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                            <tbody>
+                                                <tr>
+                                                    <td bgcolor="#f4f4f4" align="left" style="padding: 0px 30px 16px 30px;color: #666666;font-family: 'Lato', Helvetica, Arial, sans-serif;font-size: 14px;font-weight: 400;line-height: 18px;">
+                                                        <p style="margin: 0;">You received this email because your account password is being resetted</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td bgcolor="#f4f4f4" align="left" style="padding: 0px 30px 30px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; line-height: 18px;">
+                                                        <p style="margin: 0;">Suite # 6B-3/4, 6th Floor, Fakhri Trade Center, Shahra-e-Liaquat, KHI</p>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </body>
+                    </html>
+                '''
+               
+                UserService.send_email(Uemail, 'Password Reset', HTML_CONTENT)
+                print(token)
+                flash('Reset email sent Successfully!', 'success')
+                return redirect(url_for('user.forgetPass'))
+            else:
+                flash('Email Does not exist !', 'danger')
+                return redirect(url_for('user.forgetPass'))
 
-    if user and user.reset_token_expiry > datetime.datetime.now():
-        if request.method == 'POST':
-            new_password = request.form.get('new_password')
-            UserService.reset_password(user, new_password)
-            
-            flash('Your password has been successfully reset.', 'success')
-            return redirect('/login')
-        
-        return render_template('reset_password.html')
+        else:
+            flash('Email Does not exist !', 'danger')
+            return redirect(url_for('user.forgetPass'))
+
+    return render_template('forgetpass.html')
+
+
+@user_bp.route('/updateUser', methods=['POST','GET'])
+def updateUser():
+    logger.debug("UserRoutes.updateUser endpoint called")
+    if request.method == 'GET':
+        return render_template('dashboard.html')
+    firstname = request.form.get('firstname')
+    lastname = request.form.get('lastname')
+    email = request.form.get('email')
+    current_user_id = session.get('user_id')
+
+    if not current_user_id:
+        flash("Please log in first.", "error")
+        return redirect('/login')
+    try:
+        logger.debug("Update user")
+        UserService.update_user(current_user_id, firstname, lastname, email )
+        flash("User updated successfully!", "success")
+    except ValueError as e:
+        flash(str(e), "error")
+    return redirect('/dashboard')
+
+@user_bp.route('/resetpass/<token>',methods=['GET','POST'])
+def resetPass(token):
+    user_data_json=verify_secret_token(token)
+    print(user_data_json) 
+    user_id = user_data_json.get('user_id')
     
-    flash('The reset link is invalid or has expired.', 'error')
-    return redirect(url_for('user.forgot_password'))
+    session['userID']=user_id
+    return render_template('changepass.html',form=True)
 
+@user_bp.route('/changepass',methods=['GET','POST'])
+def changepass():
+    if  request.method == 'POST':
+        new_password = request.form.get('password')
+        re_new_password = request.form.get('repassword')
+        user_mail=session['userID']
+        print("my userid",user_mail)
+        if new_password == re_new_password:
+            UserService.changepassword(user_mail,new_password)
+            
+            return render_template('changepass.html',changed=True)
+            
+        else:
+            
+            return render_template('changepass.html',unchanged=True)
+    else:
+        return redirect('/login')
+    
+    
+    
+
+
+
+def verify_secret_token(token):
+    serial = Serializer(os.getenv('FLASK_SECRET_KEY', 'fallbacksecret'))
+    try:
+        data = serial.loads(token, max_age=100000)
+        print("Data:",data)
+        return data
+    except Exception as e:
+        print("Token is invalid or expired:", str(e))
+        return None
+    
 
 
 

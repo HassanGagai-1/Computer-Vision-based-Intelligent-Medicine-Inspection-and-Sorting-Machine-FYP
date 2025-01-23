@@ -1,6 +1,6 @@
 from models.machines import Machine
 from extensions import db
-
+from models.results import Result
 class MachineRepository:
     @staticmethod
     def find_by_machine_code(machine_code):
@@ -25,11 +25,15 @@ class MachineRepository:
         return Machine.query.get(machine_id)
     
     @staticmethod
-    def update_machine(machine):
+    def update_machine(machine, machine_code, updated_by):
+        machine.machine_code = machine_code
+        machine.updated_by = updated_by
         db.session.update(machine)
         db.session.commit()
     
     @staticmethod
     def delete_machine(machine):
+        Result.query.filter_by(machine_id=machine.id).delete()
         db.session.delete(machine)
         db.session.commit()
+        

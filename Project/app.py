@@ -32,7 +32,6 @@ def create_app():
     app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'fallbacksecret')
     app.config['MAIL_DEBUG'] = True
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=4)                    
-
     app.config.from_prefixed_env()
         
     mail.init_app(app)

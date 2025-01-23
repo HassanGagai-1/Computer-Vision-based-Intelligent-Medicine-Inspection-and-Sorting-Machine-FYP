@@ -1,0 +1,135 @@
+:root {
+  --gray-100: #fafafa;
+  --gray-500: #6a6a6a;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--gray-500);
+  background-color: var(--gray-100);
+}
+
+a {
+  text-decoration: none;
+  color: rgb(75, 55, 255);
+}
+
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
+.navbar,
+.footer {
+  width: 100%;
+  padding: 1rem 0.5rem;
+  background-color: #dadada;
+  text-align: center;
+  font-weight: 700;
+}
+
+.form__content {
+  padding: 2rem;
+}
+
+.form__content__header {
+  margin-bottom: 2rem;
+}
+
+.form__label {
+  margin-bottom: 0.25rem;
+  font-weight: 400;
+}
+
+.form-control {
+  border-radius: 8px;
+}
+
+.btn {
+  border-radius: 12px;
+  background: #C62B5B;
+  display: block;
+  width: 100%;
+  font-family: inherit;
+  
+  color: #fff;
+  border: 0;
+ 
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: inherit;
+  margin-bottom: calc(var(--space) * 0.5);
+}
+
+.btn:hover,
+.btn:focus {
+  opacity: 0.8;
+}
+
+.password-strength-group .password-strength-meter {
+  width: 100%;
+  transition: height 0.3s;
+  display: flex;
+  justify-content: stretch;
+}
+.password-strength-group .password-strength-meter .meter-block {
+  height: 4px;
+  background: #ccc;
+  margin-right: 6px;
+  flex-grow: 1;
+}
+.password-strength-group .password-strength-meter .meter-block:last-child {
+  margin: 0;
+}
+.password-strength-group .password-strength-message {
+  font-weight: 20px;
+  height: 1em;
+  text-align: right;
+  transition: all 0.5s;
+  margin-top: 3px;
+  position: relative;
+}
+.password-strength-group .password-strength-message .message-item {
+  font-size: 12px;
+  position: absolute;
+  right: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.password-strength-group[data-strength="1"] .meter-block:nth-child(-n+1) {
+  background: #cc3d04;
+}
+.password-strength-group[data-strength="1"] .message-item:nth-child(1) {
+  opacity: 1;
+}
+.password-strength-group[data-strength="2"] .meter-block:nth-child(-n+2) {
+  background: #ffc43b;
+}
+.password-strength-group[data-strength="2"] .message-item:nth-child(2) {
+  opacity: 1;
+}
+.password-strength-group[data-strength="3"] .meter-block:nth-child(-n+3) {
+  background: #9ea60a;
+}
+.password-strength-group[data-strength="3"] .message-item:nth-child(3) {
+  opacity: 1;
+}
+.password-strength-group[data-strength="4"] .meter-block:nth-child(-n+4) {
+  background: #289116;
+}
+.password-strength-group[data-strength="4"] .message-item:nth-child(4) {
+  opacity: 1;
+}
+@media (min-width: 48rem) {
+  .form__content {
+    width: 26rem;
+  }
+}
