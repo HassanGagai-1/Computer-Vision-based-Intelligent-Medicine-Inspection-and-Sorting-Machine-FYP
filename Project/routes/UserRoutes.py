@@ -14,13 +14,18 @@ user_bp = Blueprint('user', __name__)
 
 @user_bp.route('/', methods=['GET'])
 def home():
-    return render_template('signup.html')
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    else:
+	    return render_template('dashboard.html')
+
 
 @user_bp.route('/dashboard', methods=['GET'])
 def dashboard():
     print("Current session:", session)
+    print("Session get user_ID: ",session.get('user_id'))
     if 'user_id' not in session:
-        return redirect(url_for('user.login'))
+        return redirect(url_for('login'))
     else:
 	    return render_template('dashboard.html')
 
@@ -40,33 +45,6 @@ def register():
     except ValueError as e:
         return render_template('signup.html', error=str(e)), 400
 
-@user_bp.route('/login', methods=['POST','GET'])
-def login():
-    logger.debug("UserRoutes.login endpoint called")
-    if request.method == 'GET':
-        return render_template('login.html')
-    email = request.form.get('email')
-    password = request.form.get('password')
-    logger.info('User login attempt')
-
-    if not email or not password:
-        flash('Invalid email or password', 'error')
-        return render_template('login.html', error='Invalid email or password'), 400
-
-    try:
-        user = UserService.login_user(email, password)
-        session.permanent = True
-        session['user_id'] = user.id
-        return redirect('/dashboard')
-    except ValueError:
-        flash('Invalid credentials', 'error')
-        return render_template('login.html', error='Invalid email or password'), 400
-
-@user_bp.route('/logout', methods=['GET'])
-def logout():
-    session.clear()
-    flash("You have been successfully logged out!", "Info")
-    return redirect(url_for('user.login'))
 
 @user_bp.route('/forgetPassword', methods=['GET', 'POST'])
 def forgetPass():
@@ -339,17 +317,17 @@ def verify_secret_token(token):
 
 
 
-@user_bp.route('/api/getUserProfile', methods=['GET']) 
+@user_bp.route('/api/getUserProfile/<int:user_id>', methods=['GET']) 
 def getUserProfile():
     current_user_id = session.get('user_id')
     logger.debug(f"Current user id: {current_user_id}")
     if not current_user_id:
         return jsonify({"error": "Unauthorized access"}), 401
 
-    User = UserService.get_user_profile(current_user_id)
-    
-    if User:
-        return jsonify(User.to_dict()), 200
+    user = UserService.get_user_profile(current_user_id)
+    logger.debug(f"User Founded email is : {user.email} + {user.firstname}")
+    if user:
+        return jsonify(user.to_dict()), 200
     else:
         return jsonify({"error": "User not found"}), 404
 

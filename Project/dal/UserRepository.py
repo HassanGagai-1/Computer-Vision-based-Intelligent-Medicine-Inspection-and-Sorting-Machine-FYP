@@ -24,10 +24,10 @@ class UserRepository:
 
     @staticmethod
     def find_by_id(user_id):
-        User =  User.query.get(user_id)
-        if User:
-            print(f"User found for id {user_id}: {User.email}")
-            return User
+        user =  User.query.get(user_id)
+        if user:
+            print(f"User found for id {user_id}: {user.email}")
+            return user
         else:
             print(f"No user found for id {user_id}")
     

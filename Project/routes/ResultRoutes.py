@@ -1,12 +1,44 @@
-from flask import Blueprint, request ,jsonify
+from flask import Blueprint, request ,jsonify, session
 from services.ResultService import ResultService
 import logging
+from models.users import User
 from io import BytesIO
 from reportlab.pdfgen import canvas
-from flask import send_file
+from flask import send_file, Flask
 
 logger = logging.getLogger(__name__)
 result_bp = Blueprint('result', __name__)
+user_bp = Blueprint('user', __name__)
+
+
+@result_bp.route('/api/totalStrips', methods=['GET'])
+def totalStrips():
+    logger.debug("Get Results API CALLED")
+    print("Session in getResults:", dict(session))
+    current_user_id = session.get('user_id') 
+    print("Session user_id in getResults:", current_user_id)
+    
+    results = ResultService.get_total_medicinal_strips(current_user_id)
+    print("Results in getResults:", results)
+
+    
+    return jsonify(results), 200
+
+@result_bp.route('/api/faultyStrips', methods=['GET'])
+def faultyStrips():
+    current_user_id = session.get('user_id') 
+
+    results = ResultService.get_faulty_strips(current_user_id)
+    print("Results in getResults:", results)
+    return jsonify(results), 200
+
+@result_bp.route('/api/nonFaultyStrips', methods=['GET'])
+def nonfaultyStrips():
+    current_user_id = session.get('user_id') 
+
+    results = ResultService.get_non_faulty_strips(current_user_id)
+    print("Results in getResults:", results)
+    return jsonify(results), 200
 
 @result_bp.route('/api/generateReport', methods=['GET'])
 def generateReport():
@@ -39,3 +71,4 @@ def generateReport():
     buffer.seek(0)
 
     return send_file(buffer, as_attachment=True, download_name=f"Machine_Report_{machine_id}.pdf", mimetype='application/pdf')
+

@@ -54,8 +54,9 @@
             <nav class="navbar navbar-vertical fixed-left navbar-expand-md  bg-white col-md-2 d-md-block sidebar">
                 <div class="position-sticky">
                     <div class="text-center py-3">
-                        <img src="static\images\logo_.png" class="img-fluid rounded-circle" alt="Logo">
+                        <img src="static\images\logo2.png" class="img-fluid rounded-circle" alt="Logo">
                     </div>
+                    <div class="offcanvas-body">
                     <ul class="nav flex-column mt-3">
                         <a href="/dashboard" aria-current="page" class="link nav-link">
                             <span class="nav-link-text">Dashboard</span>   
@@ -67,6 +68,7 @@
                             <span class="nav-link-text">Log Out</span>
                         </a>
                     </ul>
+                </div>
                 </div>
             </nav>
             
@@ -85,10 +87,8 @@
 
                             </div>
                             <h5><strong>Total No. of Machines</strong></h5>
-                            <p>Total: 10</p>
-                            <p class="text-muted">Working Machine <strong>8...</strong>(56%)</p>
-                            <div class="progress">
-                                <div class="progress-bar bg-primary" style="width: 56%"></div>
+                            <div id="total-machines">
+                                
                             </div>
                         </div>
                     </div>
@@ -100,10 +100,8 @@
                             </div>
                             <h5><strong> No of Medicinal Strips </strong></h5>
                             <p></p>
-
-                            <p class="text-muted">Strips Processed <strong>52 Completed</strong> (52%)</p>
-                            <div class="progress">
-                                <div class="progress-bar bg-warning" style="width: 52%"></div>
+                            <div id="total-strips">
+                                
                             </div>
                         </div>
                     </div>
@@ -116,10 +114,8 @@
                             <h5><strong>No of Faulty Strips</strong></h5>
                             <p></p>
                             <p></p>
+                            <div id='faulty-strips'>
                             
-                            <p class="text-muted">Strips Processed: <strong>16 Completed</strong> (78%)</p>
-                            <div class="progress">
-                                <div class="progress-bar bg-success" style="width: 78%"></div>
                             </div>
                         </div>
                     </div>
@@ -131,32 +127,33 @@
                             </div>
                             <h5><strong>No of Non-Faulty Strips</strong></h5>
                             <p></p>
-                            <p class="text-muted">Strips Processed: <strong>80 Completed</strong> (55%)</p>
-                            <div class="progress">
-                                <div class="progress-bar bg-danger" style="width: 46%"></div>
-                            </div>
+                                    <div id='non-faulty-strips'>
+                                    
+                                    </div>
                         </div>
                     </div>
                 </div>
             </div>
             
                 <!-- Table Section -->
-                <div class="container padding-20 table-responsive">
-                    <table class="table table-striped table-bordered">
+                <div class="container padding-20 ">
+                    <div class="table-responsive">
+                    <table class="table table-hover table-striped table-bordered">
                         <thead class="table-dark">
                             <tr>
                                 <th>#</th>
                                 <th>Machine Code</th>
                                 <th>Created By</th>
-                                <th>created_date</th>
+                                <th >created_date</th>
                                 <th>updated_date</th>
                                 <th>Generate Report</th>
                                 <th>Delete</th>
-                            </tr>
+                                </tr>
                         </thead>
                         <tbody id="machines-table-body">
                         </tbody>
                     </table>
+                </div>
                 </div>
             </main>
         </div>
@@ -171,7 +168,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                            {% with errors = get_flashed_messages(category_filter=["verified"]) %}
+                        {% with errors = get_flashed_messages(category_filter=["verified"]) %}
                             {% if errors %}
                         <div class= "text-center justify-content-center alert alert-primary block-message error">
                             <ul>
@@ -206,100 +203,192 @@
     
     <script>
         
+        async function fetchresults(){
+            try{
+                const response = await fetch(`/api/totalStrips`);
+                const response2 = await fetch(`/api/faultyStrips`);
+                const response3 = await fetch(`/api/nonFaultyStrips`);
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                if (!response2.ok) {
+                    throw new Error(`Server error: ${response2.status}`);
+                }
+                if (!response3.ok) {
+                    throw new Error(`Server error: ${response3.status}`);
+                }
+            
+            
+            const total_medicinal_strips = await response.json();
+            const total_faulty_strips = await response2.json();
+            const total_non_faulty_strips = await response3.json();
+
+            console.log("Fetched results:", total_medicinal_strips);
+            totalStrips(total_medicinal_strips);
+            totalFaultyStrips(total_faulty_strips,total_medicinal_strips);
+            totalNonFaultyStrips(total_non_faulty_strips,total_medicinal_strips);
+
+        } catch (error) {
+            console.error("Error fetching results data:", error);
+        }
+    }
+    document.addEventListener("DOMContentLoaded", fetchresults);
+    function totalFaultyStrips(faulty,total_medicinal_strips) {
+        const stripbody = document.getElementById('faulty-strips');
+        if (!stripbody) return;
+        
+        stripbody.innerHTML = `
+        <p class="text-muted">Faulty Strips found: <strong>${faulty}</strong> (${(faulty/total_medicinal_strips)*100}%)</p>
+                            <div class="progress">
+                                <div class="progress-bar bg-danger" style="width: ${(faulty/total_medicinal_strips)*100}%"></div>
+                            </div>
+                            `;
+    }
+    function totalNonFaultyStrips(non_faulty,total_medicinal_strips) {
+        const stripbody = document.getElementById('non-faulty-strips');
+        if (!stripbody) return;
+        let percentage = (non_faulty / total_medicinal_strips) * 100;
+        stripbody.innerHTML = `
+        <p class="text-muted">Non Faulty Strips found: <strong>${non_faulty}</strong> (${(non_faulty / total_medicinal_strips)*100}%)</p>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: ${percentage.toFixed(2)}%"></div>
+                            </div>
+                            `;
+                            
+    }
+    function totalStrips(total_medicinal_strips) {
+        const stripbody = document.getElementById('total-strips');
+        if (!stripbody) return;
+        
+        stripbody.innerHTML = `
+        <p></p>
+        <p class="text-muted">Total Strips Processed <strong>${total_medicinal_strips}</strong>
+            ${(total_medicinal_strips/total_medicinal_strips) * 100}%</p>
+        <div class="progress">
+        <div class="progress-bar bg-secondary" style="width: ${(total_medicinal_strips/total_medicinal_strips) * 100}%">
+        </div>
+        </div>
+                            `;
+    }
+    
+
+        
         
         async function fetchMachines() {
             try {
-                const response = await fetch('/api/getUserMachines');
+                const response = await fetch(`/api/getUserMachines`);
+        
                 if (!response.ok) {
-                    throw new Error(Server error: ${response.status});
+                    throw new Error(`Server error: ${response.status}`);
                 }
+        
                 const machinesData = await response.json();
                 console.log("Fetched machines:", machinesData);
+        
                 updateMachinesTable(machinesData);
+                totalMachines(machinesData);
             } catch (error) {
                 console.error("Error fetching machines data:", error);
             }
         }
-    
+        
+        
+        function totalMachines(machines) {
+            const machinebody = document.getElementById('total-machines');
+            if (!machinebody) return;
+            
+            machinebody.innerHTML = `
+            <p></p>
+
+            <p class="text-muted">Working Machine <strong>${machines.length}</strong>
+                ${(machines.length/machines.length) * 100}%</p>
+            <div class="progress">
+            <div class="progress-bar bg-primary" style="width: ${(machines.length/machines.length) * 100}%">
+
+            </div>
+            </div>
+                                `;
+        }
+        
         function updateMachinesTable(machines) {
             const tableBody = document.getElementById('machines-table-body');
             if (!tableBody) return;
-            tableBody.innerHTML = '';
-    
+            tableBody.innerHTML = ''; // Clear previous table data
+        
             machines.forEach((machine, index) => {
                 const row = document.createElement('tr');
                 row.setAttribute('data-machine-id', machine.id);
                 
-                row.innerHTML = 
+                row.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${machine.machine_code}</td>
                     <td>${machine.created_by}</td>
                     <td>${machine.created_date}</td>
                     <td>${machine.updated_date}</td>
                     <td>
-                        <button onclick = "generateReport(${machine.id})" class="btn btn-primary">
+                        <button onclick="generateReport(${machine.id})" class="btn btn-primary">
                             Generate Report
                         </button>
                     </td>
                     <td>
-                        <button onclick = "deleteMachine(${machine.id})" class="btn btn-primary">
-                            Delete Machine
+                        <button onclick="deleteMachine(${machine.id})" class="btn btn-danger">
+                            Delete
                         </button>
                     </td>
-                ;
+                `;
                 tableBody.appendChild(row);
             });
         }
-        async function deleteMachine(machine_id){
+        
+        document.addEventListener("DOMContentLoaded", fetchMachines);
+
+        async function deleteMachine(machine_id) {
             if (!confirm("Are you sure you want to delete this machine?")) {
                 return;
             }
+        
             try {
-                const response = await fetch(/api/deleteMachine?machine_id=${machine_id}, {
+                const response = await fetch(`/api/deleteMachine?machine_id=${machine_id}`, {
                     method: 'GET'
                 });
-        
+                
                 if (!response.ok) {
                     const errorData = await response.json();
-                    alert(Error: ${errorData.error});
-                    throw new Error(Server error: ${response.status});
+                    alert(`Error: ${errorData.error}`);
+                    throw new Error(`Server error: ${response.status}`);
                 }
+        
                 const result = await response.json();
                 alert(result.message || 'Machine deleted successfully');
-                fetchMachines();
+                fetchMachines(); // Refresh table after deletion
             } catch (error) {
                 console.error("Error Deleting Machine: ", error);
             }   
         }
-        async function generateReport(machine_id){
+        async function generateReport(machine_id) {
             try {
-                const response = await fetch(/api/generateReport?machine_id=${machine_id}, {
+                const response = await fetch(`/api/generateReport?machine_id=${machine_id}`, {
                     method: 'GET'
                 });
-                console.log(/api/generateReport?machine_id=${machine_id});
-
+        
                 if (!response.ok) {
-                    throw new Error(Server error: ${response.status});
+                    throw new Error(`Server error: ${response.status}`);
                 }
-
+        
                 const blob = await response.blob();
-                
-                const url = window.URL.createObjectURL(blob)
-
-                const a = document.createElement('a')
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
                 a.href = url;
-                a.download = Machine_Report_${machine_id}.pdf;
-
-
-                document.body.appendChild(a)
-                a.click()
-                document.body.removeChild(a)
+                a.download = `Machine_Report_${machine_id}.pdf`;
+        
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
-            } catch(error) {
-                console.error("Error Generating report: ",error);
+            } catch (error) {
+                console.error("Error Generating report: ", error);
             }
         }
-        window.addEventListener('DOMContentLoaded', fetchMachines);
         
     </script>
     

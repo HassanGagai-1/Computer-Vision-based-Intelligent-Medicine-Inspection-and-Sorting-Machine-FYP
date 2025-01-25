@@ -39,7 +39,7 @@
             <nav class="navbar navbar-vertical fixed-left navbar-expand-md  bg-white col-md-2 d-md-block sidebar">
                 <div class="position-sticky">
                     <div class="text-center py-3">
-                        <img src="static\images\logo_.png" class="img-fluid rounded-circle" alt="Logo">
+                        <img src="static\images\logo2.png" class="img-fluid rounded-circle" alt="Logo">
                     </div>
                     <ul class="nav flex-column mt-3">
                         <a href="/dashboard" aria-current="page" class="link nav-link">
@@ -55,8 +55,44 @@
                 </div>
             </nav>
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                
+                <div class="container">
+                    <h2>User Profile</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title p-2">User Information</h5>
+                                    <p class="card-text" id="user-info"></p>
+
             </main>
             </div>
         </div>
+
+    <script>
+        async function fetchUsers() {
+            try {
+                const response = await fetch("/api/getUserProfile", { method: "GET" });
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                const user = await response.json();
+                console.log("User Information: ", user);
+                renderUser(user);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        }
+        function renderUser(user) {
+            const userInfo = document.getElementById("user-info");
+            if (!userInfo) return;
+
+            userInfo.innerHTML = `
+                <p><strong>User Name:</strong> ${user.firstname}</p>
+                <p><strong>Last Name:</strong> ${user.lastname}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+            `;
+        }
+        document.addEventListener("DOMContentLoaded", fetchUsers);
+
+    </script>
 </body>

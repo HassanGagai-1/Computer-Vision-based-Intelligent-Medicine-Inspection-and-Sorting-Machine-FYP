@@ -4,16 +4,16 @@ from routes.MachineRoutes import machine_bp
 from routes.UserMachineRoutes import user_machine_bp
 from routes.ResultRoutes import result_bp
 from extensions import db
-from flask import Flask
-from models.users import User  
-from models.machines import Machine
-from models.user_machine import UserMachine
-from models.results import Result  
 from datetime import timedelta
-import logging
 from extensions import mail
-
+import logging
+from flask import Flask, Blueprint, render_template, request, redirect, url_for, flash, session ,jsonify
+from services.UserService import UserService
+from flask import render_template
 import os
+from flask_session import Session
+
+logger = logging.getLogger(__name__)
 
 def create_app():    
     logging.basicConfig(
@@ -23,15 +23,25 @@ def create_app():
 
     load_dotenv(find_dotenv())
     app = Flask(__name__)
+    
+    
     app.config.update(
     SESSION_COOKIE_HTTPONLY=True, # Prevents JavaScript from reading the cookie         
-    SESSION_COOKIE_SECURE=False,  # True if using HTTPS                                 
+    SESSION_COOKIE_SECURE=False,  # True if using HTTPS           
+    SESSION_TYPE='filesystem',  # Enable filesystem-based session storage
+    SESSION_PERMANENT=True, 
+    SESSION_COOKIE_NAME="session",
+    SESSION_USE_SIGNER=True,  # Ensure secure signing
+    SESSION_FILE_DIR='/tmp/flask_session',  # Store session files here
+    SECRET_KEY=os.getenv('FLASK_SECRET_KEY', 'fallbacksecret'),
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=4)                      
     )
+    
+    Session(app)  
+
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-    app.config['SESSION_TYPE'] = 'filesystem'
-    app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'fallbacksecret')
     app.config['MAIL_DEBUG'] = True
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=4)                    
+
     app.config.from_prefixed_env()
         
     mail.init_app(app)
@@ -39,8 +49,43 @@ def create_app():
     
     with app.app_context():
         db.create_all()  # Create tables
+        
+    @app.route('/login', methods=['POST','GET'])
+    def login():
+        logger.debug("UserRoutes.login endpoint called")
+        if request.method == 'GET':
+            return render_template('login.html')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        logger.info('User login attempt')
+
+        if not email or not password:
+            flash('Invalid email or password', 'error')
+            return render_template('login.html', error='Invalid email or password'), 400
+
+        try:
+            user = UserService.login_user(email, password)
+            session.permanent = True
+            session['user_id'] = user.id
+            session.modified = True
+            print("Session after login:", dict(session))
+            return redirect(url_for('user.dashboard'))
+
+        except ValueError:
+            flash('Invalid credentials', 'error')
+            return render_template('login.html', error='Invalid email or password'), 400
+
+    @app.route('/logout', methods=['GET'])
+    def logout():
+        session.clear()
+        flash("You have been successfully logged out!", "Info")
+        return redirect(url_for('login'))
+    
 
 
+
+
+    
     
     app.register_blueprint(user_bp)  
     app.register_blueprint(machine_bp)  

@@ -9,7 +9,7 @@ from decorators.totp import totp_required
 from models.users import User
 from io import BytesIO
 from reportlab.pdfgen import canvas
-from flask import send_file
+
 
 logger = logging.getLogger(__name__)
 user_machine_bp = Blueprint('User_machine', __name__)
@@ -21,15 +21,16 @@ def getMachines():
     logger.debug("Get machines endpoint called")
     
     current_user_id = session.get('user_id')
-    
+    print("HERE WE ARE USING SESSION.GET", current_user_id)
     User = UserMachineService.get_user_machines(current_user_id)
-    
     if not User:
         flash("Please log in first.", "error")
         logger.debug("No user logged in")
         return redirect('/login')
     
     user_machines = User.machines
+    print("using getUserMachines API ", user_machines)
+
     
     machine_dicts = [m.to_dict() for m in user_machines]
     

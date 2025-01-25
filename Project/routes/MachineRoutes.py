@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, flash, session,jsonify
+from flask import Blueprint, render_template, request, redirect, flash, session,jsonify,Flask
 from services.MachineService import MachineService
 from flask import render_template
+
 import logging
 from decorators.totp import totp_required
 
