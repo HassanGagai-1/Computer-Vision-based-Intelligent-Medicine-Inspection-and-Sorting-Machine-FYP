@@ -20,7 +20,7 @@
         <div class="d-flex flex-column h-100 justify-content-center align-items-center">
           <div class="px-5 py-3">
             <div>
-              <img class="bx bxl-c-plus-plus img-fluid " src="{{ url_for('static', filename='images/logo_.png') }} " style="max-width: 200px; height: auto;"> 
+              <img class="bx bxl-c-plus-plus img-fluid " src="{{ url_for('static', filename='images/logo2.png') }} " style="max-width: 200px; height: auto;"> 
             </div>
           </div>
           {% if form %}
@@ -88,7 +88,7 @@
             <div class="my-3 form__submit">
                 <button class="btn  w-100" type="submit">Reset Now!</button>
             </div>
-            <div class="text-center"> Already have an account?<a href="{{ url_for('user.login') }}" class="mx-1">Sign in</a></div>
+            <div class="text-center"> Already have an account?<a href="{{ url_for('login') }}" class="mx-1">Sign in</a></div>
           </form>
           {% endif %}
           {% if changed %}

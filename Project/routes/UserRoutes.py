@@ -41,7 +41,7 @@ def register():
         password = request.form.get('password')
         
         UserService.register_user(firstname, lastname, email, password)
-        return redirect(url_for('user.login'))
+        return redirect(url_for('login'))
     except ValueError as e:
         return render_template('signup.html', error=str(e)), 400
 
@@ -277,27 +277,33 @@ def resetPass(token):
     user_data_json=verify_secret_token(token)
     print(user_data_json) 
     user_id = user_data_json.get('user_id')
-    
     session['userID']=user_id
     return render_template('changepass.html',form=True)
 
-@user_bp.route('/changepass',methods=['GET','POST'])
+@user_bp.route('/changepass', methods=['GET','POST'])
 def changepass():
-    if  request.method == 'POST':
+    if request.method == 'POST':
+        # 1. Grab form data
         new_password = request.form.get('password')
         re_new_password = request.form.get('repassword')
-        user_mail=session['userID']
-        print("my userid",user_mail)
+
+        # 2. Verify session user
+        user_mail = session.get('userID')
+        if not user_mail:
+            # handle no user in session
+            return redirect('/login')  # or show an error
+
+        # 3. Compare passwords
         if new_password == re_new_password:
-            UserService.changepassword(user_mail,new_password)
-            
-            return render_template('changepass.html',changed=True)
-            
+            UserService.changepassword(user_mail, new_password)
+            return render_template('changepass.html', changed=True)
         else:
-            
-            return render_template('changepass.html',unchanged=True)
-    else:
-        return redirect('/login')
+            return render_template('changepass.html', unchanged=True)
+
+    # If it's a GET request, just render the form
+    return render_template('changepass.html', form=True)
+
+
     
     
     
@@ -317,7 +323,7 @@ def verify_secret_token(token):
 
 
 
-@user_bp.route('/api/getUserProfile/<int:user_id>', methods=['GET']) 
+@user_bp.route('/api/getUserProfile', methods=['GET']) 
 def getUserProfile():
     current_user_id = session.get('user_id')
     logger.debug(f"Current user id: {current_user_id}")

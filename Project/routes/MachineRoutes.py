@@ -8,7 +8,7 @@ from decorators.totp import totp_required
 logger = logging.getLogger(__name__)
 machine_bp = Blueprint('machine', __name__)
 
-@machine_bp.route('/api/deleteMachine', methods=['GET'])
+@machine_bp.route('/api/deleteMachine', methods=['GET','POST'])
 @totp_required
 def delete_machine():
     machine_id = request.args.get('machine_id')
