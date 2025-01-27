@@ -50,36 +50,7 @@ def create_app():
     with app.app_context():
         db.create_all()  # Create tables
         
-    @app.route('/login', methods=['POST','GET'])
-    def login():
-        logger.debug("UserRoutes.login endpoint called")
-        if request.method == 'GET':
-            return render_template('login.html')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        logger.info('User login attempt')
-
-        if not email or not password:
-            flash('Invalid email or password', 'error')
-            return render_template('login.html', error='Invalid email or password'), 400
-
-        try:
-            user = UserService.login_user(email, password)
-            session.permanent = True
-            session['user_id'] = user.id
-            session.modified = True
-            print("Session after login:", dict(session))
-            return redirect(url_for('user.dashboard'))
-
-        except ValueError:
-            flash('Invalid credentials', 'error')
-            return render_template('login.html', error='Invalid email or password'), 400
-
-    @app.route('/logout', methods=['GET'])
-    def logout():
-        session.clear()
-        flash("You have been successfully logged out!", "Info")
-        return redirect(url_for('login'))
+    
     
 
 

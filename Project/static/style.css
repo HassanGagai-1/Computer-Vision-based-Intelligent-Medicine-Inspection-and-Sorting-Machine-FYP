@@ -16,7 +16,7 @@
   --blue: rgb(16, 14, 52);
 }
 .body{
-  font-family: 'Times New Roman', cursive;
+  font-family: 'Times New Roman';
   background-color: rgb(244, 247, 254);
   margin: 0;
   padding: 0;
@@ -40,34 +40,8 @@
   background-color: #f0f0f0; /* Slightly darker on hover */
   border-color: #bbb; /* Slightly darker border on hover */
 }
-.search-container {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-  max-width: 400px; /* Adjust width as needed */
-}
 
-/* Search bar styling */
-.search-bar {
-  width: 100%; /* Make it full width inside the container */
-  padding: 10px 40px 10px 20px; /* Add space for the icon */
-  font-size: 1.2rem; /* Increase text size */
-  border: 1px solid #ccc;
-  border-radius: 4px; /* Rounded corners */
-  outline: none;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow */
-}
-.search-icon {
-  position: absolute;
-  transform: translateX(920%); /* Center vertically */
-  font-size: 1.2rem; /* Adjust icon size */
-  color: #000000; /* Icon color */
-  pointer-events: none; /* Prevent clicking on the icon */
-}
-.search-icon i {
-  font-size: 1.2rem;
-  color: #000000;
-}
+
 
 .home-section {
   position: relative;
@@ -86,6 +60,8 @@
   font-family: 'New Times Roman';
 
 }
+
+
 .p-3 {
   padding: 1rem !important;
 }
@@ -175,7 +151,7 @@
   padding: 1vw 4vw;
   align-items: center;
   flex-direction: column;
-  font-family: 'Permanent Marker', cursive;
+  font-family: 'Times New Roman';
   padding: clamp(0.25em, 1vmin, 1em) clamp(1em, 4vmin, 4em);  
   text-decoration: none;
   position: relative;
@@ -231,7 +207,7 @@
   justify-content: space-between;
   text-decoration: none;
   padding: 10px 0;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .sidebar .nav-link:hover {
@@ -300,7 +276,7 @@
 }
 
 .menu-button {
-  background-color: #2d5eff;
+  background-color: #0d6efd;
   color: white;
   padding: 8px 15px;
   border-radius: 50%;
@@ -317,26 +293,13 @@
   display: flex;
   align-items: center;
   gap: 15px;
-}
-
-.navbar-icons i {
-  font-size: 1.2rem;
   color: #495057;
   cursor: pointer;
   position: relative;
 }
 
-.notification-badge {
-  font-size: 0.75rem;
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: red;
-  color: white;
-  padding: 3px 6px;
-  border-radius: 50%;
-  font-weight: bold;
-}
+
+
 
 .profile-img {
   width: 40px;

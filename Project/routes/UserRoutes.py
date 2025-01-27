@@ -4,8 +4,7 @@ from flask import render_template
 from models.users import User
 import logging
 from extensions import db
-from services.totp_service import generate_totp_secret, get_totp_uri, generate_qr_code_image,verify_totp_code
-import datetime
+from services.totp_service import generate_totp_secret, get_totp_uri,verify_totp_code
 import os
 from itsdangerous import URLSafeTimedSerializer as Serializer
 
@@ -45,7 +44,38 @@ def register():
     except ValueError as e:
         return render_template('signup.html', error=str(e)), 400
 
+@user_bp.route('/login', methods=['POST','GET'])
+def login():
+        logger.debug("UserRoutes.login endpoint called")
+        if request.method == 'GET':
+            return render_template('login.html')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        logger.info('User login attempt')
 
+        if not email or not password:
+            flash('Invalid email or password', 'error')
+            return render_template('login.html', error='Invalid email or password'), 400
+
+        try:
+            user = UserService.login_user(email, password)
+            session.permanent = True
+            session['user_id'] = user.id
+            session.modified = True
+            print("Session after login:", dict(session))
+            return redirect(url_for('user.dashboard'))
+
+        except ValueError:
+            flash('Invalid credentials', 'error')
+            return render_template('login.html', error='Invalid email or password'), 400
+
+@user_bp.route('/logout', methods=['GET'])
+def logout():
+        session.clear()
+        flash("You have been successfully logged out!", "Info")
+        return redirect(url_for('user.login'))
+    
+    
 @user_bp.route('/forgetPassword', methods=['GET', 'POST'])
 def forgetPass():
     if request.method == 'POST':
@@ -283,24 +313,23 @@ def resetPass(token):
 @user_bp.route('/changepass', methods=['GET','POST'])
 def changepass():
     if request.method == 'POST':
-        # 1. Grab form data
+       
         new_password = request.form.get('password')
+    
         re_new_password = request.form.get('repassword')
 
-        # 2. Verify session user
         user_mail = session.get('userID')
-        if not user_mail:
-            # handle no user in session
-            return redirect('/login')  # or show an error
+    
+        if not user_mail:        
+            return redirect('/login')  
 
-        # 3. Compare passwords
+        
         if new_password == re_new_password:
             UserService.changepassword(user_mail, new_password)
             return render_template('changepass.html', changed=True)
         else:
             return render_template('changepass.html', unchanged=True)
 
-    # If it's a GET request, just render the form
     return render_template('changepass.html', form=True)
 
 
@@ -312,6 +341,7 @@ def changepass():
 
 def verify_secret_token(token):
     serial = Serializer(os.getenv('FLASK_SECRET_KEY', 'fallbacksecret'))
+    
     try:
         data = serial.loads(token, max_age=100000)
         print("Data:",data)
@@ -325,13 +355,17 @@ def verify_secret_token(token):
 
 @user_bp.route('/api/getUserProfile', methods=['GET']) 
 def getUserProfile():
+    
     current_user_id = session.get('user_id')
+    
     logger.debug(f"Current user id: {current_user_id}")
     if not current_user_id:
         return jsonify({"error": "Unauthorized access"}), 401
 
     user = UserService.get_user_profile(current_user_id)
+    
     logger.debug(f"User Founded email is : {user.email} + {user.firstname}")
+    
     if user:
         return jsonify(user.to_dict()), 200
     else:
@@ -343,39 +377,37 @@ def profile():
     user_id = session.get('user_id')
     if not user_id:
         return redirect('/login')
-    user = User.query.get(user_id)
+    User.query.get(user_id)
     return render_template('profile.html')
 
 @user_bp.route('/enable_totp/<int:user_id>', methods=['POST','GET'])
 def enable_totp(user_id):
     """Admin route to enable TOTP for a user and return a QR code for scanning."""
     user = User.query.get(user_id)
-    if not user:
-        abort(404, "User not found")
     
-    # Generate a new secret and store it
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
     secret = generate_totp_secret()
     user.totp_secret = secret
     db.session.commit()
 
-    # Create the TOTP URI
-    totp_uri = get_totp_uri(secret, user.firstname, issuer='MyApp')
-
-    # Optional: Generate a QR code image in memory
-    qr_buf = generate_qr_code_image(totp_uri)
-
-    # Return the image as a response so admin can show it to the user
-    # or save it somewhere
-    return send_file(qr_buf, mimetype='image/png')
-
-
 @user_bp.route('/verify_totp', methods=['POST'])
 def verify_totp():
     """Route that verifies the TOTP code the user typed in."""
-    user_id = session.get('user_id')  
+    
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+    
     code = request.form.get('totp_code')
-
+    
+    if not code:
+        return jsonify({"error": "TOTP code is required"}), 400
+    
     user = User.query.get(user_id)
+    
     if not user or not user.totp_secret:
         return jsonify({"error": "User not found or TOTP not enabled."}), 400
 
