@@ -5,7 +5,6 @@ from services.UserMachineService import UserMachineService
 from services.ResultService import ResultService
 from flask import render_template
 import logging
-from decorators.totp import totp_required
 from models.users import User
 from io import BytesIO
 from reportlab.pdfgen import canvas
