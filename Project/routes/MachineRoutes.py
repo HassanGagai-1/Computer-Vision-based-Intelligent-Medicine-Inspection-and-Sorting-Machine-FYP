@@ -14,6 +14,7 @@ def delete_machine():
     machine = MachineService.machine_verification(machine_id)
     print('HEre is my Machine',machine)
     MachineService.delete_machine(machine)
+    
     return jsonify({'status': 'success', 'status_code': 200})
 
 

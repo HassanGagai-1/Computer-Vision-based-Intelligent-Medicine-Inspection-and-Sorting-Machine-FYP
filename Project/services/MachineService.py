@@ -2,6 +2,8 @@ from models.machines import Machine
 from dal.MachineRepository import MachineRepository
 import logging
 from extensions import db
+from flask import jsonify
+
 from models.user_machine import UserMachine
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,15 @@ class MachineService:
         
         return machine
     
-    
+    @staticmethod
+    def find_machine(machine_code, machine_password):
+        machine = MachineRepository.find_by_machine_code(machine_code)
+        if not machine:
+            return 404
+        elif machine.machine_password != machine_password:
+            return 403
+        else:
+            return machine
     
     @staticmethod
     def get_machine_info(machine_code):

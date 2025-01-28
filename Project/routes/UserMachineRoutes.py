@@ -43,3 +43,33 @@ def getMachines():
     
     return jsonify(machine_dicts),200
 
+
+@user_machine_bp.route('/linkMachine', methods=['GET','POST'])
+def linkMachine():
+    logger.debug("Add machine endpoint called")
+    if request.method == 'GET':
+        return render_template('dashboard.html')
+    if request.method == 'POST':
+        machine_code = request.form.get('machine_code')
+        current_user_id = session.get('user_id')
+        machine_password = request.form.get('machine_password')
+        if not current_user_id:
+            flash("Please log in first.", "error")
+            return redirect('/login')
+        try:
+            logger.debug("Register machine")
+            response = MachineService.find_machine(machine_code, machine_password)
+            if response == 404:
+                flash("Machine not found", "error")
+                
+                return jsonify({"error": "Machine not found"}), 404
+            elif response == 403:
+                flash("Invalid Machine Password", "error")
+                return jsonify({"error": "Invalid Machine Password"}), 403
+            else:
+                return jsonify({"success": "Machine found", "data": response}), 200
+        except ValueError as e:
+            flash(str(e), "error")
+            return jsonify({"error": str(e)}), 400
+    return redirect('/dashboard')
+
