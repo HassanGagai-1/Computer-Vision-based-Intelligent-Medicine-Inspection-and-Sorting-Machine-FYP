@@ -17,6 +17,19 @@
 </head>
 
 <body>
+    <div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} mt-2">
+                        <div class="errorMessage m-0">
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
     <div class="row">
         <div class="col-lg-6 col-xl-6 p-0">
             <div class="d-flex flex-column h-100 justify-content-center">                    
