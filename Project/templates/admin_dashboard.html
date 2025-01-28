@@ -1,97 +1,35 @@
 
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 {% block user_page %}  
-              <section class="row">
-                <div class="col-md-6 col-lg-3">
-                  <!-- card -->
-                  <article class="p-4 rounded shadow-sm border-left
-                     mb-4">
-                    <div class="m-0 text-center">
-                     <div class="icon-circle mb-3">
-                                <i class="fa-solid fa-industry"></i>
-                            </div>
-                            <h5><strong>Total No. of Machines</strong></h5>
-                            <div id="total-machines">
-                                
-                            </div>
-                        </div>
-                  </article>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <!-- card -->
-                    <article class="p-4 rounded shadow-sm border-left
-                       mb-4">
-                       <div class="m-0 text-center">
-                        <div class="icon-circle mb-3">
-                            <i class="fa-solid fa-pills"></i>
-                        </div>  
-                        <h5><strong> No of Medicinal Strips </strong></h5>
-                        <div id="total-strips">
-                        </div>
-
-                       </div>
-                    </article>
-                  </div>
-                <div class="col-md-6 col-lg-3">
-                  <article class="p-4 rounded shadow-sm border-left mb-4">
-                    <div class="m-0 text-center">
-                        <div class="icon-circle mb-3">
-                            <i class="fa-solid fa-capsules text-danger"></i>
-                        </div>
-                        <h5><strong>No of Faulty Strips</strong></h5>
-                        <p></p>
-                        <div id='faulty-strips'>
-                        </div>
-                    </div>
-                  </article>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                  <article class="p-4 rounded shadow-sm border-left mb-4">
-                    <div class="m-0 text-center">
-                    <div class="icon-circle mb-3">
-                        <i class="fa-solid fa-prescription-bottle-medical text-success"></i>
-                    </div>
-                    <h5><strong>No of Non-Faulty Strips</strong></h5>
-                    <p></p>
-
-                            <div id='non-faulty-strips'>
-                            
-                            </div></div>
-                  </article>
-                </div>
-              </section>
               
-              <div class="bg-white border-0 border-left px-3 py-2 rounded shadow-sm">
-                <div class="m-0 my-3 px-0 row">
-                    <div class="col-6 p-0">
-                        <div class="h5">Available Machines</div>
-                    </div>
-                    <div class="col-6 p-0 text-right">
-                        <button class="btn btn-primary" aria-label="Add new machine" data-toggle="modal" data-target="#addMachineModal">
-                            Add Machine <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="w-100">
-            
-                <div class="table-responsive">
-                <table class="table table-hover table-striped table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>#</th>
-                            <th>Machine Code</th>
-                            <th>Created By</th>
-                            <th>created_date</th>
-                            <th>updated_date</th>
-                            <th>Generate Report</th>
-                            <th>Delete</th>
-                            </tr>
-                    </thead>
-                    <tbody id="machines-table-body"></tbody>
-                </table>
-            
-            </div>
-        </div>
+      <div class="bg-white border-0 border-left px-3 py-2 rounded shadow-sm">
+       <div class="text-dark">
+              <h1 class="h3 text-primary">Add Machine</h1>
+              <div class="row">
+                  <div class="col-md-3">
+                      <div class="py-2">
+                          <div class="">
+                              <img id="machine_icon" class="img-fluid" src="https://dl5hm3xr9o0pk.cloudfront.net/instagram/p-details-big.jpg">
+                          </div>
+                      </div>
+                      <input type="file" class="py-3" id="machineImageUploader">
+                  </div>
+                  <div class="col-md-9">
+                      <label class="mb-2">Machine Name *</label>
+                      <input id="machine_name" class="form-control" type="text" required>
+                      <label class="my-2">Machine Code *</label>
+                      <input id="machine_price" class="form-control" type="text">
+                      <label class="my-2">Machine Secret *</label>
+                      <input id="machine_price" class="form-control" type="password">
+                      <label class="my-2">Machine Description</label>
+                      <textarea id="machine_desc" draggable="false" class="form-control" rows="5"></textarea>
+                  </div>
+                  
+              </div>
+              <div class="mt-4 w-100">
+                  <button class="btn btn-danger w-100" id="add_machine">Add machine</button>
+              </div>
+          </div>      
       </div>
           
       {% endblock %}
