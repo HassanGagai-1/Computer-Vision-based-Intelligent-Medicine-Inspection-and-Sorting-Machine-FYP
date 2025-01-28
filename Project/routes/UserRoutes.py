@@ -39,7 +39,7 @@ def register():
         password = request.form.get('password')
         
         UserService.register_user(firstname, lastname, email, password)
-        return redirect(url_for('login'))
+        return redirect(url_for('user.login'))
     except ValueError as e:
         return render_template('signup.html', error=str(e)), 400
 
