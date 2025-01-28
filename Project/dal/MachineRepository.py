@@ -33,7 +33,8 @@ class MachineRepository:
     
     @staticmethod
     def delete_machine(machine):
-        Result.query.filter_by(machine_id=machine.id).delete()
-        db.session.delete(machine)
+        machine = Machine.query.filter_by(machine_id=machine.id).all()
+        machine.is_deleted = True
+        db.session.update(machine)
         db.session.commit()
-        
+        return machine.is_deleted

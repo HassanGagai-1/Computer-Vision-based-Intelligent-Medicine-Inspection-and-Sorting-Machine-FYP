@@ -13,12 +13,20 @@ from reportlab.pdfgen import canvas
 logger = logging.getLogger(__name__)
 user_machine_bp = Blueprint('User_machine', __name__)
 
+@user_machine_bp.route('/api/deleteMachines', methods=['GET'])
+def getAdminMachines():
+    
+    logger.debug("Get machines endpoint called")
+    
+    machines = MachineService.get_all_machines()
+    machine_dicts = [m.to_dict() for m in machines]
+    
+    return jsonify(machine_dicts),200
 
 @user_machine_bp.route('/api/getUserMachines', methods=['GET'])
 def getMachines():
     
     logger.debug("Get machines endpoint called")
-    
     current_user_id = session.get('user_id')
     print("HERE WE ARE USING SESSION.GET", current_user_id)
     User = UserMachineService.get_user_machines(current_user_id)

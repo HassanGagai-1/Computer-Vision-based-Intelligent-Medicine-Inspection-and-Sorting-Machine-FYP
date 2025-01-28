@@ -3,15 +3,16 @@ from routes.UserRoutes import user_bp
 from routes.MachineRoutes import machine_bp
 from routes.UserMachineRoutes import user_machine_bp
 from routes.ResultRoutes import result_bp
+from models.roles import Role
 from extensions import db
 from datetime import timedelta
-from extensions import mail
 import logging
 from flask import Flask, Blueprint, render_template, request, redirect, url_for, flash, session ,jsonify
 from services.UserService import UserService
 from flask import render_template
 import os
 from flask_session import Session
+from flask_migrate import Migrate
 
 logger = logging.getLogger(__name__)
 
@@ -44,20 +45,12 @@ def create_app():
 
     app.config.from_prefixed_env()
         
-    mail.init_app(app)
     db.init_app(app)
+    migrate = Migrate(app, db)
     
     with app.app_context():
         db.create_all()  # Create tables
         
-    
-    
-
-
-
-
-    
-    
     app.register_blueprint(user_bp)  
     app.register_blueprint(machine_bp)  
     app.register_blueprint(user_machine_bp)

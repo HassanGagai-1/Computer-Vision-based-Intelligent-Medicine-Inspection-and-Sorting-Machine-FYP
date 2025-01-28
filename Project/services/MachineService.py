@@ -16,6 +16,8 @@ class MachineService:
         
         return machine
     
+    
+    
     @staticmethod
     def get_machine_info(machine_code):
         return MachineRepository.find_by_machine_code(machine_code)
