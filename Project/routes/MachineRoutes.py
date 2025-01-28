@@ -3,13 +3,11 @@ from services.MachineService import MachineService
 from flask import render_template
 
 import logging
-from decorators.totp import totp_required
 
 logger = logging.getLogger(__name__)
 machine_bp = Blueprint('machine', __name__)
 
 @machine_bp.route('/api/deleteMachine', methods=['GET','POST'])
-@totp_required
 def delete_machine():
     machine_id = request.args.get('machine_id')
     print('Machine_ID: ',machine_id)
@@ -20,7 +18,6 @@ def delete_machine():
 
 
 @machine_bp.route('/addMachine', methods=['GET','POST'])
-@totp_required
 def addMachine():
     logger.debug("Add machine endpoint called")
     if request.method == 'GET':
@@ -42,7 +39,6 @@ def addMachine():
     return redirect('/dashboard')
 
 @machine_bp.route('/api/updateMachine', methods=['GET','POST'])
-@totp_required
 def updateMachine():
     logger.debug("Update machine endpoint called")
     if request.method == 'GET':

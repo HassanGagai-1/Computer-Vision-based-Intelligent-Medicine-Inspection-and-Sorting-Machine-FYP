@@ -4,7 +4,6 @@ from flask import render_template
 from models.users import User
 import logging
 from extensions import db
-from services.totp_service import generate_totp_secret, get_totp_uri,verify_totp_code
 import os
 from itsdangerous import URLSafeTimedSerializer as Serializer
 
@@ -379,43 +378,4 @@ def profile():
         return redirect('/login')
     User.query.get(user_id)
     return render_template('profile.html')
-
-@user_bp.route('/enable_totp/<int:user_id>', methods=['POST','GET'])
-def enable_totp(user_id):
-    """Admin route to enable TOTP for a user and return a QR code for scanning."""
-    user = User.query.get(user_id)
-    
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-    
-    secret = generate_totp_secret()
-    user.totp_secret = secret
-    db.session.commit()
-
-@user_bp.route('/verify_totp', methods=['POST'])
-def verify_totp():
-    """Route that verifies the TOTP code the user typed in."""
-    
-    user_id = session.get('user_id')
-    
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
-    
-    code = request.form.get('totp_code')
-    
-    if not code:
-        return jsonify({"error": "TOTP code is required"}), 400
-    
-    user = User.query.get(user_id)
-    
-    if not user or not user.totp_secret:
-        return jsonify({"error": "User not found or TOTP not enabled."}), 400
-
-    if verify_totp_code(user.totp_secret, code):
-        session['totp_verified'] = True
-        flash("TOTP verification successful", "verified")
-        return render_template('dashboard.html')
-    else:
-        flash("Invalid TOTP code", "TOTPError")
-        return render_template('dashboard.html')
 
