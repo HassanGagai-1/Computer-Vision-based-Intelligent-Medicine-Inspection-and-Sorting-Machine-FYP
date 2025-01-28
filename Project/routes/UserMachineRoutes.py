@@ -27,7 +27,6 @@ def getAdminMachines():
 def getMachines():
     
     logger.debug("Get machines endpoint called")
-    
     current_user_id = session.get('user_id')
     print("HERE WE ARE USING SESSION.GET", current_user_id)
     User = UserMachineService.get_user_machines(current_user_id)

@@ -1,12 +1,12 @@
 from extensions import db
 
 class UserMachine(db.Model):
-    __tablename__ = 'user_machine'
+    __tablename__ = 'userMachine'
     
     id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    machine_id = db.Column(db.Integer(), db.ForeignKey('machines.id', ondelete='CASCADE'), nullable=False)
-    is_deleted = db.Column(db.Boolean(), nullable=True, default=False)
+    user_id = db.Column(db.Integer(),  nullable=False)
+    machine_id = db.Column(db.Integer(), nullable=False)
+    is_deleted = db.Column(db.Boolean(), nullable=False, default=False)
     
     def __repr__(self):
         return f'<UserMachine {self.id}>'

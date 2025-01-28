@@ -2,7 +2,7 @@ from extensions import db
     
     
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
     
     id = db.Column(db.Integer(), primary_key=True)
     firstname = db.Column(db.String(50), nullable=False)
@@ -10,14 +10,7 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role_id = db.Column(db.Integer(),  nullable=False, default=2)
-    is_deleted = db.Column(db.Boolean(), nullable=True, default=False)
-    
-    machines = db.relationship(
-        'Machine',
-        secondary = 'user_machine',
-        backref='users'
-    )
-    
+    is_deleted = db.Column(db.Boolean(), nullable=False, default=False)
     
     def __repr__(self):
         return f'<User {self.email} {self.id}>'

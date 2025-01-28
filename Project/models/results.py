@@ -1,10 +1,10 @@
 from extensions import db
 
 class Result(db.Model):
-    __tablename__ = 'results'
+    __tablename__ = 'result'
     
     result_id = db.Column(db.Integer(), primary_key=True)
-    machine_id = db.Column(db.Integer(), db.ForeignKey('machines.id', ondelete='CASCADE'), nullable=False)
+    machine_id = db.Column(db.Integer(), nullable=False)
     created_date = db.Column(db.DateTime(), nullable=False)
     is_deleted = db.Column(db.Boolean(), nullable=True)
     total_strips = db.Column(db.Integer(), nullable=True)

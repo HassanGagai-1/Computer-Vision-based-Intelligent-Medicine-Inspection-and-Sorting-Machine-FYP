@@ -37,4 +37,4 @@ class MachineRepository:
         machine.is_deleted = True
         db.session.update(machine)
         db.session.commit()
-        return True
+        return machine.is_deleted
