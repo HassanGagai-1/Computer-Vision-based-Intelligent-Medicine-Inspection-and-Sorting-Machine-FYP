@@ -11,17 +11,22 @@ class Machine(db.Model):
     created_by = db.Column(db.String(255), nullable=False)
     created_date = db.Column(db.DateTime(), nullable=False)
     updated_date = db.Column(db.DateTime(), nullable=True)
+    updated_by = db.Column(db.String(255), nullable=True)
+    is_deleted = db.Column(db.Boolean(), nullable=True, default=False)
 
     results = relationship('Result', backref='machine', lazy=True)
-
+    
     def __repr__(self):
         return f'<Machine {self.machine_code} {self.id}>'
 
-    def __init__(self, machine_code, created_by):
+    def __init__(self, machine_code, created_by,updated_by):
         self.machine_code = machine_code
         self.created_by = created_by
         self.created_date = datetime.datetime.now()
         self.updated_date = datetime.datetime.now()
+        self.updated_by = updated_by
+        self.is_deleted = False
+        
 
     def to_dict(self):
         return {

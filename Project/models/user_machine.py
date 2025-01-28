@@ -6,6 +6,7 @@ class UserMachine(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     machine_id = db.Column(db.Integer(), db.ForeignKey('machines.id', ondelete='CASCADE'), nullable=False)
+    is_deleted = db.Column(db.Boolean(), nullable=True, default=False)
     
     def __repr__(self):
         return f'<UserMachine {self.id}>'
@@ -13,10 +14,12 @@ class UserMachine(db.Model):
     def __init__(self, user_id, machine_id):
         self.user_id = user_id
         self.machine_id = machine_id
+        self.is_deleted = False
         
     def to_dict(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "machine_id": self.machine_id
+            "machine_id": self.machine_id,
+            "is_deleted": self.is_deleted
         }

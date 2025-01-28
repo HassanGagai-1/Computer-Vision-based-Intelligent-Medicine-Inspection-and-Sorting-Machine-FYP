@@ -13,7 +13,7 @@ user_bp = Blueprint('user', __name__)
 @user_bp.route('/', methods=['GET'])
 def home():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('user.login'))
     else:
 	    return render_template('dashboard.html')
 
@@ -26,6 +26,15 @@ def dashboard():
         return redirect(url_for('user.login'))
     else:
 	    return render_template('dashboard.html')
+
+@user_bp.route('/admin_dashboard', methods=['GET'])
+def admin_dashboard():
+    print("Current session:", session)
+    print("Session get user_ID: ",session.get('user_id'))
+    if 'user_id' not in session:
+        return redirect(url_for('user.login'))
+    else:
+        return render_template('admin_dashboard.html')
 
 @user_bp.route('/register', methods=['POST','GET'])
 def register():
@@ -423,7 +432,10 @@ def login():
             session['user_id'] = user.id
             session.modified = True
             print("Session after login:", dict(session))
-            return redirect(url_for('user.dashboard'))
+            if user.role_id == 2:
+                return redirect(url_for('user.dashboard'))
+            else:
+                return redirect(url_for('user.admin_dashboard'))
 
         except ValueError:
             flash('Invalid credentials', 'error')

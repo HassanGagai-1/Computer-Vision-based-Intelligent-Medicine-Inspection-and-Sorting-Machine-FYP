@@ -8,7 +8,6 @@ import secrets
 from itsdangerous import URLSafeTimedSerializer as Serializer
 import datetime
 import os
-from extensions import mail
 from flask_mail import Message
 from flask import url_for
 ph = PasswordHasher()
@@ -60,36 +59,8 @@ class UserService:
         else:
             raise ValueError("User not found")
         
-    @staticmethod
-    def forget_password(email):
-            user = UserRepository.find_by_email(email)
-            if not user:
-                flash('email has been sent, if the mail has not been received then invalid email', 'approved')
-            
-            if user:
-                reset_token = secrets.token_urlsafe(32)
-                reset_token_expiry = datetime.datetime.now() + datetime.timedelta(hours=1)
-                
-                UserRepository.reset_token(user,reset_token, reset_token_expiry)
-                reset_url = url_for('user.reset_password', token=reset_token, _external=True)
-                msg = Message(
-                    'Password Reset Request',
-                    sender='bcsbs2112320@szabist.pk',
-                    recipients=[user.email]
-                )
-                msg.body = f'Click the following link to reset your password: {reset_url}'
-                mail.send(msg)
-        
-    @staticmethod
-    def reset_password(user, password):
-        if not user:
-            raise ValueError("Invalid or expired token")
-        hashed_password = ph.hash(password)
-        user.password = hashed_password
-        user.reset_token = None
-        user.reset_token_expiry = None
-        UserRepository.update_user(user)
-        return user
+
+
 
     @staticmethod
     def get_user_profile(user_id):

@@ -9,10 +9,8 @@ class User(db.Model):
     lastname = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    totp_secret = db.Column(db.String(255), nullable=True)
-    
-    reset_token = db.Column(db.String(255), nullable=True) 
-    reset_token_expiry = db.Column(db.DateTime(), nullable=True)
+    role_id = db.Column(db.Integer(),  nullable=False, default=2)
+    is_deleted = db.Column(db.Boolean(), nullable=True, default=False)
     
     machines = db.relationship(
         'Machine',
@@ -29,6 +27,8 @@ class User(db.Model):
         self.lastname = lastname
         self.email = email
         self.password = password
+        self.role_id = 2
+        self.is_deleted = False
     
     def to_dict(self):
         return {
@@ -36,4 +36,6 @@ class User(db.Model):
             "firstname": self.firstname,
             "lastname": self.lastname,
             "email": self.email,
+            "role_id": self.role_id,
+            "is_deleted": self.is_deleted  # Include deletion status
         }
