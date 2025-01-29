@@ -186,41 +186,25 @@ $('#customfieldForm').on('click', '.btn', function(event) {
     // Remove the parent div with the class 'CustomFields'
     $(this).closest('.CustomFields').remove();
 });
+
 $(document).on('click', "#updatebtn", function() {
     var id = $(this).attr('data-id');
     console.log("value ",id);
     axios({
         method: 'GET',
-        url: baseUrl + `/product/get/${id}` 
+        url: baseUrl + `/admin/get/${id}` 
     }).then(res => {
         const response = res.data;
         console.log(response)
         globalID=response.id;
             
-        $('#product_icon').attr('src',response.icon_url);
-        $('#product_name').val(response.name);
-        $('#product_price').val(response.price)
-        $('#mycategory').val(response.category_id);
-        $('#product_desc').val(response.description)
+        $('#machine_icon').attr('src',response.machine_profile_img);
+        $('#machine_name').val(response.machine_name);
+        $('#machine_code').val(response.machine_code);
+        $('#machine_secret').val(response.machine_password);
+        $('#machine_desc').val(response.machine_description);
         $('#rndfk').click();
-        let form=$('#customfieldForm');
-        let data = JSON.parse(response.custom_fields)
-        form.html('')
-        $.each(data.option, function(key, value) {
-            // Create the HTML structure
-            let customField = `
-                <div class="my-1 CustomFields">
-                    <div class="align-items-center d-flex">
-                        <label class="m-0 pr-3 label_title text-capitalize">${key}:</label>
-                        <input class="bg-white label_value border fieldName form-control shadow-none" value="${value}">
-                        <button class="btn form-control h-100 text-danger w-auto"><i class="bx bx-trash h3 m-0 p-0"></i></button>
-                    </div>
-                </div>
-            `;
-            // Append the generated HTML to the form
-            form.append(customField);
-        });
-        
+       
     }).catch(err => {
         myhideLoader();
         console.log(err)
@@ -246,7 +230,7 @@ $(document).on('click', "#deletebtn", function() {
     if (result.isConfirmed) {
             axios({
                 method: 'DELETE',
-                url: baseUrl + `/product/delete/${id}` 
+                url: baseUrl + `/admin/delete/${id}` 
             }).then(res => {
                 const response = res.data;
                 console.log(response);
@@ -266,69 +250,54 @@ $(document).on('click', "#deletebtn", function() {
     });
 });
 
-$(document).on('click', "#update_product", function() {
+$(document).on('click', "#update_machine", function() {
     myshowLoader();
     
- 
-    let img_icon = $('#product_icon').attr('src');
-    let product_name = $('#product_name').val().trim();
-    let product_price = $('#product_price').val().trim();
-    let product_category_id = $('#mycategory').val();
-    let product_desc = $('#product_desc').val().trim();
+    let img_icon = $('#machine_icon').attr('src');
+    let machine_name = $('#machine_name').val().trim();
+    let machine_code = $('#machine_code').val().trim();
+    let machine_secret = $('#machine_secret').val().trim();
+    let machine_desc = $('#machine_desc').val().trim();
     
-    // Check if product image is the default image (i.e., not changed by the user)
-    if (img_icon === 'https://dl5hm3xr9o0pk.cloudfront.net/instagram/p-details-big.jpg') {
-        showToastMessage('error', 'Please upload a product image!');
+    // Check if machine image is the default image (i.e., not changed by the user)
+    if (img_icon === 'https://dl5hm3xr9o0pk.cloudfront.net/instagram/Chapli-kabab-Beef.jpg') {
+        showToastMessage('error', 'Please upload a machine image!');
         myhideLoader();
         return;
     }
 
     // Validate required fields
-    if (!product_name || !product_price || !product_category_id || !product_desc) {
+    if (!machine_name || !machine_code || !machine_secret) {
         showToastMessage('error', 'Please fill in all required fields!');
-        myhideLoader();
-        return;
-    }
-
-    // Validate product price
-    if (isNaN(product_price) || parseFloat(product_price) <= 0) {
-        showToastMessage('error', 'Please enter a valid price!');
-        myhideLoader();
-        return;
-    }
-
-    // Validate product category
-    if (parseInt(product_category_id) <= 0) {
-        showToastMessage('error', 'Please select a valid category!');
         myhideLoader();
         return;
     }
 
     axios({
         method: 'PUT',
-        url: baseUrl + '/product/create',
+        url: baseUrl + '/admin/create',
         data: {
-            id:globalID,
+            
+            id: globalID,
             img_icon: img_icon,
-            product_name: product_name,  
-            product_price: product_price,
-            product_category_id: product_category_id,
-            product_desc: product_desc,
-            custom_field: getAllCustomfield()
+            machine_name: machine_name,  
+            machine_code: machine_code,
+            machine_secret: machine_secret,
+            machine_desc: machine_desc
         }  
     }).then(res => {
         const response = res.data;
-        console.log(response)
+        console.log(response);
         if(response.status !== 200) {
             showToastMessage('error', 'Something Went Wrong!');
             myhideLoader();
             return;
         }
-        showToastMessage('success', 'Successfully Product Update!');
+        showToastMessage('success', 'Successfully Updated Machine!');
         location.reload(true);
     }).catch(err => {
         myhideLoader();
-        console.log(err)
+        console.log(err);
         showToastMessage('error', 'Something Went Wrong!');
     });
 });

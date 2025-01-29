@@ -7,24 +7,14 @@ import os
 logger = logging.getLogger(__name__)
 machine_bp = Blueprint('machine', __name__)
 
-@machine_bp.route('/admin/delete', methods=['DELETE'])
-def admin_delete():
-    current_user_id = session.get('user_id')
-    if not current_user_id:
-        flash("Please log in first.", "error")
-        return redirect('/login')
-    
+@machine_bp.route('/admin/delete/<int:id>', methods=['DELETE'])
+def admin_delete(id):
     if request.method == "DELETE":
-        machine_id = request.args.get('machine_id')
+        
         user_id = session.get('user_id')
-        # user_id = session.get('user_id')
-        
-        # if not user_id:
-        #     flash("Please log in first.", "error")
-        #     return redirect('/login')
-        
-        print('Machine_ID: ',machine_id)
-        machine = MachineService.machine_verification(machine_id,user_id)
+       
+        print('Machine_ID: ',id)
+        machine = MachineService.machine_verification(id,user_id)
         
         print('Here is my Machine',machine)
         is_deleted = MachineService.delete_machine(machine)
