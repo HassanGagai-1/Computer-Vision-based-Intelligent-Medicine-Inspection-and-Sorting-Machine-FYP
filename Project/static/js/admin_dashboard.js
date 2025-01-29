@@ -46,7 +46,7 @@ function validateImageDimensions(file, callback) {
     img.src = URL.createObjectURL(file);
 }
 
-$('#ProductImageUploader').on('change', function(event) {
+$('#machineImageUploader').on('change', function(event) {
     var file = event.target.files[0];
     if (!file) {
         return;
@@ -130,7 +130,7 @@ $(document).on('click', "#add_machine", function() {
 
     axios({
         method: 'POST',
-        url: baseUrl + '/machine/create',
+        url: baseUrl + '/admin/create',
         data: {
             img_icon: img_icon,
             machine_name: machine_name,
