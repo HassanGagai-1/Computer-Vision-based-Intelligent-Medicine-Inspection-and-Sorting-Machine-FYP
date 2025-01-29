@@ -11,10 +11,10 @@ class UserMachine(db.Model):
     def __repr__(self):
         return f'<UserMachine {self.id}>'
     
-    def __init__(self, user_id, machine_id):
+    def __init__(self, user_id, machine_id, is_deleted = False):
         self.user_id = user_id
         self.machine_id = machine_id
-        self.is_deleted = False
+        self.is_deleted = is_deleted
         
     def to_dict(self):
         return {

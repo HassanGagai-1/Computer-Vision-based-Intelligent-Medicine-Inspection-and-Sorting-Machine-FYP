@@ -1,11 +1,16 @@
 from models.machines import Machine
 from extensions import db
 from models.results import Result
+import logging
+
+logger = logging.getLogger(__name__)
+
 class MachineRepository:
     @staticmethod
     def find_by_machine_code(machine_code):
         return Machine.query.filter_by(machine_code=machine_code).first()
 
+    
     @staticmethod
     def find_machine_password(machine_password):
         return Machine.query.filter_by(machine_password=machine_password).first()

@@ -656,7 +656,6 @@ def forgetPass():
                     </body>
                     </html>
                 '''
-               
                 UserService.send_email(Uemail, 'Password Reset', HTML_CONTENT)
                 print(token)
                 flash('Reset email sent Successfully!', 'success')
@@ -716,18 +715,13 @@ def changepass():
 
         
         if new_password == re_new_password:
+            
             UserService.changepassword(user_mail, new_password)
             return render_template('changepass.html', changed=True)
         else:
             return render_template('changepass.html', unchanged=True)
 
     return render_template('changepass.html', form=True)
-
-
-    
-    
-    
-
 
 
 def verify_secret_token(token):
