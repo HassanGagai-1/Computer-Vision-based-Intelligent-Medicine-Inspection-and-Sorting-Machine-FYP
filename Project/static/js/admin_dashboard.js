@@ -46,7 +46,7 @@ function validateImageDimensions(file, callback) {
     img.src = URL.createObjectURL(file);
 }
 
-$('#ProductImageUploader').on('change', function(event) {
+$('#machineImageUploader').on('change', function(event) {
     var file = event.target.files[0];
     if (!file) {
         return;
