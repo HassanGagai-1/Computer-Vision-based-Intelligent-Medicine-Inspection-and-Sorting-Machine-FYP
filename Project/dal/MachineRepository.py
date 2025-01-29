@@ -29,8 +29,8 @@ class MachineRepository:
         return query.all()
     
     @staticmethod
-    def find_by_machine_code(machine_code):
-        return Machine.query.filter_by(machine_code=machine_code).first()
+    def find_by_machine_id(id):
+        return Machine.query.filter_by(id=id).first()
 
     
     @staticmethod

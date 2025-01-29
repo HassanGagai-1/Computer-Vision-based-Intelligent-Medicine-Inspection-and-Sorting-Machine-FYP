@@ -50,11 +50,11 @@
           </h1>
           
             <div class="list-group rounded-0">
-              <a href="{{ url_for('user.add_machine')}}" class="list-group-item list-group-item-action active border-0 d-flex align-items-center">
+              <a href="{{ url_for('user.add_machine')}}" class="list-group-item {{addmachineClass}} list-group-item-action  border-0 d-flex align-items-center">
                 <span class="bi bi-plus-circle-fill"></span>
                 <span class="ml-2">Add Machine</span>
               </a>
-              <a href="{{ url_for('user.view_machine')}}" class="list-group-item list-group-item-action border-0 align-items-center">
+              <a href="{{ url_for('user.view_machine')}}" class="list-group-item {{viewmachineClass}} list-group-item-action border-0 align-items-center">
                 <span class="bi bi-view-list"></span>
                 <span class="ml-2">View Machine</span>
               </a>
@@ -176,6 +176,8 @@
     });
   });
 </script>
+
+
 {% block javascript %}
 {% endblock %}
     

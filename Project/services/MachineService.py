@@ -33,8 +33,8 @@ class MachineService:
         return machine
     
     @staticmethod
-    def update_admin_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img):
-        machine = MachineRepository.find_by_machine_code(machine_code)
+    def update_admin_machine(machine_id,current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img):
+        machine = MachineRepository.find_by_machine_id(machine_id)
         if not machine:
             raise ValueError('Machine not found')
         
