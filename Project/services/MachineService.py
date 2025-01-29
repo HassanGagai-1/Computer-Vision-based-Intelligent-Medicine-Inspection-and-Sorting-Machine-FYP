@@ -5,11 +5,12 @@ from dal.UserRepository import UserRepository
 import logging
 from extensions import db
 from flask import jsonify
-
+import datetime
 from models.user_machine import UserMachine
 logger = logging.getLogger(__name__)
 
 class MachineService:
+    
     @staticmethod
     def register_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img):
         print("User Created by", current_user_id)
@@ -32,6 +33,21 @@ class MachineService:
         return machine
     
     @staticmethod
+    def update_admin_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img):
+        machine = MachineRepository.find_by_machine_code(machine_code)
+        if not machine:
+            raise ValueError('Machine not found')
+        
+        print("MACHINE HAS BEEN FOUND", machine)
+        machine.machine_name = machine_name
+        machine.machine_password = machine_password
+        machine.machine_description = machine_description
+        machine.machine_profile_img = machine_profile_img
+        machine.updated_by = current_user_id
+        machine.updated_date = datetime.datetime.now()
+        MachineRepository.update_machine(machine)
+    
+    @staticmethod
     def find_machine_and_link(machine_code, machine_password, current_user_id):
         machine = MachineRepository.find_by_machine_code(machine_code)
         if not machine:
@@ -44,9 +60,13 @@ class MachineService:
             return machine.to_dict()
 
     @staticmethod
-    def get_all_machines(current_user_id):
+    def get_all_machines():
         
-        return MachineRepository.get_all_machines(current_user_id)
+        return MachineRepository.get_all_machines()
+    
+    def get_by_ID(machine_id,user_id):
+        return MachineRepository.find_by_id(machine_id,user_id)
+        
     
     @staticmethod
     def get_machine_info(machine_code):
@@ -57,8 +77,8 @@ class MachineService:
         return MachineRepository.find_by_id(machine_id)
         
     @staticmethod
-    def machine_verification(machine_id):
-        Machine = MachineRepository.find_by_id(machine_id)
+    def machine_verification(machine_id,user_id):
+        Machine = MachineRepository.find_by_id(machine_id,user_id)
         if not Machine:
             return ValueError("Machine not found")
         else:
@@ -71,14 +91,6 @@ class MachineService:
             raise ValueError('Machine not found')
         else:
             MachineRepository.update_machine(machine, machine_code, updated_by)
-
-    @staticmethod
-    def update_admin_machine(machine_name,machine_password,machine_code,machine_description,machine_profile_img):
-        machine = MachineRepository.find_by_machine_code(machine_code)
-        if not machine:
-            raise ValueError('Machine not found')
-        else:
-            MachineRepository.update_machine(machine, machine_name, machine_password, machine_code, machine_description, machine_profile_img)
     
     @staticmethod
     def delete_machine(machine):
