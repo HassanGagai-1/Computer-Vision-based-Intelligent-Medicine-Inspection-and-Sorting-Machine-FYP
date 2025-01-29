@@ -8,10 +8,10 @@ class Machine(db.Model):
 
     id = db.Column(db.Integer(), primary_key=True)
     machine_code = db.Column(db.String(255), nullable=False)
-    created_by = db.Column(db.String(255), nullable=False)
+    created_by = db.Column(db.Integer(), nullable=False)
     created_date = db.Column(db.DateTime(), nullable=False)
     updated_date = db.Column(db.DateTime(), nullable=True)
-    updated_by = db.Column(db.String(255), nullable=True)
+    updated_by = db.Column(db.Integer(), nullable=True)
     is_deleted = db.Column(db.Boolean(), nullable=True, default=False)
     machine_password = db.Column(db.String(255), nullable=False)
     machine_description = db.Column(db.String(255), nullable=True)

@@ -31,7 +31,7 @@ class UserRepository:
         
         if user:
             print(f"User found for id {user_id}: {user.firstname} {user.lastname}")
-            return user.firstname + " " + user.lastname
+            return user
         else:
             print(f"No user found for id {user_id}")
             return None
