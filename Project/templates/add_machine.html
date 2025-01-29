@@ -1,0 +1,35 @@
+
+{% extends "admin_base.html" %}
+{% block user_page %}  
+              
+      <div class="bg-white border-0 border-left px-3 py-2 rounded shadow-sm">
+       <div class="text-dark">
+              <h1 class="h3 text-primary">Add Machine</h1>
+              <div class="row">
+                  <div class="col-md-3">
+                      <div class="py-2">
+                          <div class="">
+                              <img id="machine_icon" class="img-fluid" src="https://dl5hm3xr9o0pk.cloudfront.net/instagram/p-details-big.jpg">
+                          </div>
+                      </div>
+                      <input type="file" class="py-3" id="machineImageUploader">
+                  </div>
+                  <div class="col-md-9">
+                      <label class="mb-2">Machine Name *</label>
+                      <input id="machine_name" class="form-control" type="text" required>
+                      <label class="my-2">Machine Code *</label>
+                      <input id="machine_code" class="form-control" type="text">
+                      <label class="my-2">Machine Secret *</label>
+                      <input id="machine_secret" class="form-control" type="password">
+                      <label class="my-2">Machine Description</label>
+                      <textarea id="machine_desc" draggable="false" class="form-control" rows="5"></textarea>
+                  </div>
+                  
+              </div>
+              <div class="mt-4 w-100">
+                  <button class="btn btn-danger w-100" id="add_machine">Add machine</button>
+              </div>
+          </div>      
+      </div>
+          
+      {% endblock %}
