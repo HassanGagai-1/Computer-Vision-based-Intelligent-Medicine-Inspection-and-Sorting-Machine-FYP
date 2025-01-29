@@ -14,7 +14,18 @@ class MachineService:
     def register_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img):
         created_by = UserRepository.find_user_name_by_id(current_user_id)
         print("User Created by", created_by)
-        machine = Machine(machine_name,machine_password,machine_code, created_by, machine_description, machine_profile_img)
+        updated_by = created_by
+        if not machine_code:
+            raise ValueError("Machine code cannot be empty")
+        machine = Machine(
+                machine_name=machine_name,
+                machine_code=machine_code,
+                created_by=created_by,
+                updated_by=created_by,
+                machine_password=machine_password,
+                machine_description=machine_description,
+                machine_profile_img=machine_profile_img
+            )
         MachineRepository.create_machine(machine)
         
         # user_machine = UserMachine(user_id=current_user_id, machine_id = machine.id)
@@ -58,6 +69,14 @@ class MachineService:
         else:
             MachineRepository.update_machine(machine, machine_code, updated_by)
 
+    @staticmethod
+    def update_admin_machine(machine_name,machine_password,machine_code,machine_description,machine_profile_img):
+        machine = MachineRepository.find_by_machine_code(machine_code)
+        if not machine:
+            raise ValueError('Machine not found')
+        else:
+            MachineRepository.update_machine(machine, machine_name, machine_password, machine_code, machine_description, machine_profile_img)
+    
     @staticmethod
     def delete_machine(machine):
         deleted = MachineRepository.delete_machine(machine)
