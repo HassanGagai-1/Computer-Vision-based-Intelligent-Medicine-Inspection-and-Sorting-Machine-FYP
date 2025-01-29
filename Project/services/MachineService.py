@@ -12,16 +12,14 @@ logger = logging.getLogger(__name__)
 class MachineService:
     @staticmethod
     def register_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img):
-        created_by = UserRepository.find_user_name_by_id(current_user_id)
-        print("User Created by", created_by)
-        updated_by = created_by
+        print("User Created by", current_user_id)
         if not machine_code:
             raise ValueError("Machine code cannot be empty")
         machine = Machine(
                 machine_name=machine_name,
                 machine_code=machine_code,
-                created_by=created_by,
-                updated_by=created_by,
+                created_by=current_user_id,
+                updated_by=current_user_id,
                 machine_password=machine_password,
                 machine_description=machine_description,
                 machine_profile_img=machine_profile_img
@@ -45,6 +43,11 @@ class MachineService:
             UserMachineRepository.create_user_machine(user_machine)
             return machine.to_dict()
 
+    @staticmethod
+    def get_all_machines(current_user_id):
+        
+        return MachineRepository.get_all_machines(current_user_id)
+    
     @staticmethod
     def get_machine_info(machine_code):
         return MachineRepository.find_by_machine_code(machine_code)

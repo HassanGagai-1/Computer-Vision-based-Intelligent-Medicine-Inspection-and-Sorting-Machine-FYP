@@ -9,15 +9,19 @@ machine_bp = Blueprint('machine', __name__)
 
 @machine_bp.route('/admin/delete', methods=['GET','POST'])
 def admin_delete():
-    machine_id = request.args.get('machine_id')
+    # machine_id = request.args.get('machine_id')
+    
+    data = request.get_json() 
+    machine_id = data.get('machine_id')
+    
     print('Machine_ID: ',machine_id)
     machine = MachineService.machine_verification(machine_id)
     print('HEre is my Machine',machine)
     is_deleted = MachineService.delete_machine(machine)
     if is_deleted:
-        return jsonify({'status': 'success', 'status_code': 200})
+        return jsonify({'status': 200, 'message' : 'Machine Deleted Successfully'}),200
     else:
-        return jsonify({'status': 'failed', 'status_code': 400})
+        return jsonify({'status': 400, 'message' : 'Machine deletion failed'}),400
 
 @machine_bp.route('/uploadFile', methods=['POST'])
 def uploadFile():
@@ -37,6 +41,15 @@ def uploadFile():
 			print(f"The file {image_url} was not found.")
 			return jsonify(400)
 
+@machine_bp.route('/admin/getAll', methods=['GET'])
+def adminGET():
+    logger.debug("Get machines endpoint called")
+    data = request.get_json()  
+    current_user_id = data.get('user_id')
+    machines = MachineService.get_all_machines(current_user_id)
+    print("Machinesssssss",machines)
+    machine_dicts = [m.to_dict() for m in machines]
+    return jsonify(machine_dicts),200
 
 @machine_bp.route('/admin/create', methods=['GET','POST'])
 def adminCreate():
@@ -50,7 +63,7 @@ def adminCreate():
     machine_password = data.get('machine_secret')
     machine_description = data.get('machine_desc')
     machine_profile_img = data.get('img_icon')
-    current_user_id = data.get('user_id')
+    current_user_id = session.get('user_id')
 
     if not current_user_id:
         flash("Please log in first.", "error")
@@ -63,12 +76,12 @@ def adminCreate():
             
             MachineService.register_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img)
             flash("Machine added successfully!", "success")
-            return jsonify({'status': 'success', 'status_code': 200})
+            return jsonify({'status': 200, 'message' : 'Machine added Successfully'}),200
         elif request.method == "PUT":
             MachineService.update_admin_machine(machine_name,machine_password,machine_code,machine_description,machine_profile_img)
     except ValueError as e:
         flash(str(e), "error")
-        return jsonify({'status': 'failed', 'status_code': 400})
+        return jsonify({'status': 400, 'message' : 'Machine Deletion Failed'}),400
 
     return redirect('/dashboard')
 
