@@ -57,7 +57,7 @@ def delinkMachine():
         try:
             logger.debug("Delink machine")
             logger.debug("Machine Code is", machine_id)
-            response = MachineService.find_machine(machine_id)
+            response = UserMachineService.find_machine_delink(machine_id)
             if response == 404:
                 flash("Machine not found", "error")
                 return jsonify({"error": "Machine not found"}), 404
@@ -96,8 +96,10 @@ def linkMachine():
             elif response == 403:
                 flash("Invalid Machine Password", "error")
                 return jsonify({"error": "Invalid Machine Password"}), 403
+            elif response == 401:
+                return jsonify({"error": "Machine has been deleted"}), 401
             else:
-                return jsonify({"success": "Machine found","data":response}), 200
+                return jsonify({"success": "Machine found"}), 200
         except ValueError as e:
             flash(str(e), "error")
             return jsonify({"error": str(e)}), 400

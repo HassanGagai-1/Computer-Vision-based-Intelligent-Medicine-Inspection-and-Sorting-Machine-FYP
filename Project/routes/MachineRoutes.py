@@ -9,6 +9,11 @@ machine_bp = Blueprint('machine', __name__)
 
 @machine_bp.route('/admin/delete', methods=['DELETE'])
 def admin_delete():
+    current_user_id = session.get('user_id')
+    if not current_user_id:
+        flash("Please log in first.", "error")
+        return redirect('/login')
+    
     if request.method == "DELETE":
         machine_id = request.args.get('machine_id')
         user_id = session.get('user_id')
@@ -63,6 +68,10 @@ def adminGetID(machine_id):
     
 @machine_bp.route('/admin/get/all', methods=['GET'])
 def adminGetAll():
+    current_user_id = session.get('user_id')
+    if not current_user_id:
+        flash("Please log in first.", "error")
+        return redirect('/login')
     logger.debug("Get machines endpoint called")
     machines = MachineService.get_all_machines()
     print("Machinesssssss",machines)
@@ -88,11 +97,11 @@ def adminCreate():
     machine_password = data.get('machine_secret')
     machine_description = data.get('machine_desc')
     machine_profile_img = data.get('img_icon')
+    
     current_user_id = session.get('user_id')
-
-    # if not current_user_id:
-    #     flash("Please log in first.", "error")
-    #     return redirect('/login')
+    if not current_user_id:
+        flash("Please log in first.", "error")
+        return redirect('/login')
     try:
         logger.debug("Register machine")
         if request.method == "POST":

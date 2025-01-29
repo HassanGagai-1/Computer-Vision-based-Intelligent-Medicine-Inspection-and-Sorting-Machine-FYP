@@ -11,28 +11,17 @@ class UserMachineRepository:
     
     @staticmethod
     def create_user_machine(user_machine):
-        # Check if the user and machine can be linked by performing a JOIN query
-        user_alias = aliased(User)  # Alias for user table
-
-        # Perform the SQL equivalent join check
-        result = db.session.query(User, UserMachine, Machine).\
-            join(UserMachine, and_(
-                User.id == UserMachine.user_id,
-                UserMachine.is_deleted == False,
-                UserMachine.machine_id == user_machine.machine_id
-            )).\
-            join(Machine, and_(
-                Machine.id == user_machine.machine_id,
-                Machine.is_deleted == False
-            )).\
-            filter(User.id == user_machine.user_id).\
-            first()  # Only want to check if a match exists
-
-        # If the result exists, it means the user can be linked to the machine
-        if result:
-            db.session.add(user_machine)  # Add the new user-machine link
+        db.session.add(user_machine) 
+        db.session.commit()
+    
+    @staticmethod
+    def find_machine_by_id(machine_id):
+        machine = Machine.query.get(machine_id)
+        if machine:
+            machine.is_deleted = True
+            db.session.commit(machine)
             db.session.commit()
-            return user_machine
+            return machine
         else:
-            # If no match, return an error or some other behavior (like raising an exception)
-            raise ValueError("Cannot link this user to the machine. Invalid user or machine.")
+            return 404
+        
