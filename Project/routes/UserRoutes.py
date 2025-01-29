@@ -637,7 +637,6 @@ def forgetPass():
                     </body>
                     </html>
                 '''
-               
                 UserService.send_email(Uemail, 'Password Reset', HTML_CONTENT)
                 print(token)
                 flash('Reset email sent Successfully!', 'success')
