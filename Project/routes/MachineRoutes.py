@@ -7,21 +7,26 @@ import os
 logger = logging.getLogger(__name__)
 machine_bp = Blueprint('machine', __name__)
 
-@machine_bp.route('/admin/delete', methods=['GET','POST'])
+@machine_bp.route('/admin/delete', methods=['DELETE'])
 def admin_delete():
-    # machine_id = request.args.get('machine_id')
-    
-    data = request.get_json() 
-    machine_id = data.get('machine_id')
-    
-    print('Machine_ID: ',machine_id)
-    machine = MachineService.machine_verification(machine_id)
-    print('HEre is my Machine',machine)
-    is_deleted = MachineService.delete_machine(machine)
-    if is_deleted:
-        return jsonify({'status': 200, 'message' : 'Machine Deleted Successfully'}),200
-    else:
-        return jsonify({'status': 400, 'message' : 'Machine deletion failed'}),400
+    if request.method == "DELETE":
+        machine_id = request.args.get('machine_id')
+        user_id = session.get('user_id')
+        # user_id = session.get('user_id')
+        
+        # if not user_id:
+        #     flash("Please log in first.", "error")
+        #     return redirect('/login')
+        
+        print('Machine_ID: ',machine_id)
+        machine = MachineService.machine_verification(machine_id,user_id)
+        
+        print('Here is my Machine',machine)
+        is_deleted = MachineService.delete_machine(machine)
+        if is_deleted:
+            return jsonify({'status': 200, 'message' : 'Machine Deleted Successfully'}),200
+        else:
+            return jsonify({'status': 400, 'message' : 'Machine deletion failed'}),400
 
 @machine_bp.route('/uploadFile', methods=['POST'])
 def uploadFile():
@@ -41,21 +46,41 @@ def uploadFile():
 			print(f"The file {image_url} was not found.")
 			return jsonify(400)
 
-@machine_bp.route('/admin/getAll', methods=['GET'])
-def adminGET():
+@machine_bp.route('/admin/get/<int:machine_id>', methods=['GET'])
+def adminGetID(machine_id):
+    logger.debug("Get machine by ID endpoint called")
+    logger.debug(f"Request Args: {request.view_args}")
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("Please log in first.", "error")
+        return redirect('/login')
+    
+    machine = MachineService.get_by_ID(machine_id,user_id)
+    if machine:
+        return jsonify(machine.to_dict()),200
+    else:
+        return jsonify({'status': 400, 'message' : 'Machine not found'}),400
+    
+@machine_bp.route('/admin/get/all', methods=['GET'])
+def adminGetAll():
     logger.debug("Get machines endpoint called")
-    data = request.get_json()  
-    current_user_id = data.get('user_id')
-    machines = MachineService.get_all_machines(current_user_id)
+    machines = MachineService.get_all_machines()
     print("Machinesssssss",machines)
-    machine_dicts = [m.to_dict() for m in machines]
+    machine_dicts = [   
+        {
+            "id": m[0],
+            "machine_name": m[1],
+            "machine_code": m[2],
+            "machine_password": m[3],
+            "created_by": m[4]
+        }
+        for m in machines
+    ]
     return jsonify(machine_dicts),200
 
-@machine_bp.route('/admin/create', methods=['GET','POST'])
+@machine_bp.route('/admin/create', methods=['POST','PUT'])
 def adminCreate():
     logger.debug("Add machine endpoint called")
-    if request.method == 'GET':
-        return render_template('dashboard.html')
     
     data = request.get_json()  
     machine_name = data.get('machine_name')
@@ -65,44 +90,18 @@ def adminCreate():
     machine_profile_img = data.get('img_icon')
     current_user_id = session.get('user_id')
 
-    if not current_user_id:
-        flash("Please log in first.", "error")
-        return redirect('/login')
-    
+    # if not current_user_id:
+    #     flash("Please log in first.", "error")
+    #     return redirect('/login')
     try:
         logger.debug("Register machine")
-        
         if request.method == "POST":
-            
             MachineService.register_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img)
             flash("Machine added successfully!", "success")
             return jsonify({'status': 200, 'message' : 'Machine added Successfully'}),200
         elif request.method == "PUT":
-            MachineService.update_admin_machine(machine_name,machine_password,machine_code,machine_description,machine_profile_img)
+            MachineService.update_admin_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img)
     except ValueError as e:
         flash(str(e), "error")
         return jsonify({'status': 400, 'message' : 'Machine Deletion Failed'}),400
-
-    return redirect('/dashboard')
-
-@machine_bp.route('/api/updateMachine', methods=['GET','POST'])
-def updateMachine():
-    logger.debug("Update machine endpoint called")
-    if request.method == 'GET':
-        return render_template('dashboard.html')
-    machine_code = request.form.get('machine_code')
-    updated_by = request.form.get('updated_by')
-    current_user_id = session.get('user_id')
-    machine_id = request.args.get('machine_id')
-
-    if not current_user_id:
-        flash("Please log in first.", "error")
-        return redirect('/login')
-    try:
-        logger.debug("Update machine")
-
-        MachineService.update_machine(machine_code,updated_by, machine_id)
-        flash("Machine updated successfully!", "success")
-    except ValueError as e:
-        flash(str(e), "error")
     return redirect('/dashboard')
