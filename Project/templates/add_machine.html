@@ -18,7 +18,7 @@
                       <label class="mb-2">Machine Name *</label>
                       <input id="machine_name" class="form-control" type="text" required>
                       <label class="my-2">Machine Code *</label>
-                      <input id="machine_code" class="form-control" type="text">
+                      <input id="machine_code" class="form-control" type="text" readonly>
                       <label class="my-2">Machine Secret *</label>
                       <input id="machine_secret" class="form-control" type="password">
                       <label class="my-2">Machine Description</label>
@@ -31,5 +31,18 @@
               </div>
           </div>      
       </div>
-          
+      {% endblock %}   
+       {% block javascript %}
+       <script>
+        $(document).ready(function() {
+            function generateMachineCode() {
+                let randomNum = Math.floor(1000 + Math.random() * 9000); // Generate a 4-digit random number
+                return "CVBMIM" + randomNum; // Concatenate "MAC" with the random number
+            }
+    
+            $("#machine_code").val(generateMachineCode()); // Set the generated code to the input field
+        });
+    </script>
+       
+      
       {% endblock %}

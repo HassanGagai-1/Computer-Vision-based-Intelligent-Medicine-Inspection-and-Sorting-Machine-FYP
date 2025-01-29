@@ -34,7 +34,7 @@ def admin_dashboard():
     if 'user_id' not in session:
         return redirect(url_for('user.login'))
     else:
-        return render_template('add_machine.html')
+        return render_template('add_machine.html',addmachineClass='active',viewmachineClass='Not')
 
 @user_bp.route('/add_machine', methods=['GET'])
 def add_machine():
@@ -43,7 +43,7 @@ def add_machine():
     if 'user_id' not in session:
         return redirect(url_for('user.login'))
     else:
-        return render_template('add_machine.html')
+        return render_template('add_machine.html',addmachineClass='active',viewmachineClass='Not')
     
 @user_bp.route('/view_machine', methods=['GET'])
 def view_machine():
@@ -52,7 +52,7 @@ def view_machine():
     if 'user_id' not in session:
         return redirect(url_for('user.login'))
     else:
-        return render_template('view_machine.html')
+        return render_template('view_machine.html',addmachineClass='not',viewmachineClass='active')
 
 
 @user_bp.route('/register', methods=['POST','GET'])

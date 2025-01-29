@@ -70,11 +70,11 @@ $('#machineImageUploader').on('change', function(event) {
             }
         }).then(res => {
             console.log(res.data);
-            const responseData = res.data;
+            const responseData = res.data;  
             const uploadFilename = responseData.filename;
             console.log(uploadFilename);
       
-            $('img.img-fluid').attr('src', responseData.file_base64);
+            $('#machine_icon').attr('src', responseData.file_base64);
         
         }).catch(err => {
             console.error("Upload failed:", err);
@@ -260,7 +260,7 @@ $(document).on('click', "#update_machine", function() {
     let machine_desc = $('#machine_desc').val().trim();
     
     // Check if machine image is the default image (i.e., not changed by the user)
-    if (img_icon === 'https://dl5hm3xr9o0pk.cloudfront.net/instagram/Chapli-kabab-Beef.jpg') {
+    if (img_icon === 'https://dl5hm3xr9o0pk.cloudfront.net/instagram/p-details-big.jpg') {
         showToastMessage('error', 'Please upload a machine image!');
         myhideLoader();
         return;
