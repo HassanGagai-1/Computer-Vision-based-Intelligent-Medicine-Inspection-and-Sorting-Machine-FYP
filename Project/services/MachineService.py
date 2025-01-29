@@ -54,6 +54,8 @@ class MachineService:
             return 404
         elif machine.machine_password != machine_password:
             return 403
+        elif machine.is_deleted == True:
+            return 401
         else:
             user_machine = UserMachine(user_id=current_user_id, machine_id = machine.id, is_deleted = False)
             UserMachineRepository.create_user_machine(user_machine)
