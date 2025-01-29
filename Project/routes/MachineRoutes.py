@@ -98,8 +98,11 @@ def adminCreate():
             MachineService.register_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img)
             flash("Machine added successfully!", "success")
             return jsonify({'status': 200, 'message' : 'Machine added Successfully'}),200
+        
         elif request.method == "PUT":
-            MachineService.update_admin_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img)
+            machine_id = data.get('id')
+            machine = MachineService.update_admin_machine(machine_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img)
+            return jsonify({'status': 200, 'message' : 'Machine Updated Successfully', 'data' : machine}),200
     except ValueError as e:
         flash(str(e), "error")
         return jsonify({'status': 400, 'message' : 'Machine Deletion Failed'}),400

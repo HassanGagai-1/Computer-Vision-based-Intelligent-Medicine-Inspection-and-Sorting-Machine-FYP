@@ -54,10 +54,11 @@ def delinkMachine():
     if request.method == 'POST':
         data = request.get_json()  
         machine_id = data.get('machine_id')
+        user_id = data.get('user_id')
         try:
             logger.debug("Delink machine")
             logger.debug("Machine Code is", machine_id)
-            response = UserMachineService.find_machine_delink(machine_id)
+            response = UserMachineService.delink_machine(machine_id,user_id)
             if response == 404:
                 flash("Machine not found", "error")
                 return jsonify({"error": "Machine not found"}), 404
@@ -75,13 +76,13 @@ def linkMachine():
     if request.method == 'GET':
         return render_template('dashboard.html')
     if request.method == 'POST':
-        # machine_code = request.form.get('machine_code')
+        machine_code = request.form.get('machine_code')
         current_user_id = session.get('user_id')
-        # machine_password = request.form.get('machine_password')
+        machine_password = request.form.get('machine_password')
         
-        # if not current_user_id:
-        #     flash("Please log in first.", "error")
-        #     return redirect('/login')
+        if not current_user_id:
+            flash("Please log in first.", "error")
+            return redirect('/login')
         data = request.get_json()  
         machine_code = data.get('machine_code')
         machine_password = data.get('machine_password')
