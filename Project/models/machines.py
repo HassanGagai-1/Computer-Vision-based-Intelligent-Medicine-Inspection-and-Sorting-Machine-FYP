@@ -38,6 +38,7 @@ class Machine(db.Model):
             "id": self.id,
             "machine_name": self.machine_name,
             "machine_code": self.machine_code,
+            "machine_password": self.machine_password,
             "created_by": self.created_by,
             "created_date": self.created_date,
             "updated_date": self.updated_date,

@@ -16,6 +16,8 @@
     
 
     </head>
+    {% block stylesheets %}
+    {% endblock %}
     <style>
         .h5, h5 {
     font-size: 1rem!important;
@@ -174,7 +176,8 @@
     });
   });
 </script>
-
+{% block javascript %}
+{% endblock %}
     
 </body>
 </html>
