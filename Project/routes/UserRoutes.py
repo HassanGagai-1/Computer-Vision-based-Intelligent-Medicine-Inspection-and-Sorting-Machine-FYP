@@ -34,7 +34,26 @@ def admin_dashboard():
     if 'user_id' not in session:
         return redirect(url_for('user.login'))
     else:
-        return render_template('admin_dashboard.html')
+        return render_template('add_machine.html')
+
+@user_bp.route('/add_machine', methods=['GET'])
+def add_machine():
+    print("Current session:", session)
+    print("Session get user_ID: ",session.get('user_id'))
+    if 'user_id' not in session:
+        return redirect(url_for('user.login'))
+    else:
+        return render_template('add_machine.html')
+    
+@user_bp.route('/view_machine', methods=['GET'])
+def view_machine():
+    print("Current session:", session)
+    print("Session get user_ID: ",session.get('user_id'))
+    if 'user_id' not in session:
+        return redirect(url_for('user.login'))
+    else:
+        return render_template('view_machine.html')
+
 
 @user_bp.route('/register', methods=['POST','GET'])
 def register():
