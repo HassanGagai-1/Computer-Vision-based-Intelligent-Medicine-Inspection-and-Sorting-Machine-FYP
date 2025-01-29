@@ -7,19 +7,21 @@ import os
 logger = logging.getLogger(__name__)
 machine_bp = Blueprint('machine', __name__)
 
-@machine_bp.route('/api/deleteMachine', methods=['GET','POST'])
-def delete_machine():
+@machine_bp.route('/admin/delete', methods=['GET','POST'])
+def admin_delete():
     machine_id = request.args.get('machine_id')
     print('Machine_ID: ',machine_id)
     machine = MachineService.machine_verification(machine_id)
     print('HEre is my Machine',machine)
-    MachineService.delete_machine(machine)
-    
-    return jsonify({'status': 'success', 'status_code': 200})
+    is_deleted = MachineService.delete_machine(machine)
+    if is_deleted:
+        return jsonify({'status': 'success', 'status_code': 200})
+    else:
+        return jsonify({'status': 'failed', 'status_code': 400})
 
 @machine_bp.route('/uploadFile', methods=['POST'])
 def uploadFile():
-	attachment_file = request.files.get("img_icon")
+	attachment_file = request.files.get("file_doc")
 	if attachment_file is not None:
 		filename = attachment_file.filename
 		s3_object_key = f'instagram/{filename}'
@@ -48,7 +50,7 @@ def adminCreate():
     machine_password = data.get('machine_secret')
     machine_description = data.get('machine_desc')
     machine_profile_img = data.get('img_icon')
-    current_user_id = session.get('user_id')
+    current_user_id = data.get('user_id')
 
     if not current_user_id:
         flash("Please log in first.", "error")
@@ -56,11 +58,18 @@ def adminCreate():
     
     try:
         logger.debug("Register machine")
-        MachineService.register_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img)
-        flash("Machine added successfully!", "success")
-        return jsonify({'status': 'success', 'status_code': 200})
+        
+        if request.method == "POST":
+            
+            MachineService.register_machine(current_user_id,machine_name,machine_password,machine_code,machine_description,machine_profile_img)
+            flash("Machine added successfully!", "success")
+            return jsonify({'status': 'success', 'status_code': 200})
+        elif request.method == "PUT":
+            MachineService.update_admin_machine(machine_name,machine_password,machine_code,machine_description,machine_profile_img)
     except ValueError as e:
         flash(str(e), "error")
+        return jsonify({'status': 'failed', 'status_code': 400})
+
     return redirect('/dashboard')
 
 @machine_bp.route('/api/updateMachine', methods=['GET','POST'])
