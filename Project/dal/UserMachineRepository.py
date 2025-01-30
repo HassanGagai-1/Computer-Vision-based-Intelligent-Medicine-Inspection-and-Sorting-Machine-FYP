@@ -50,6 +50,7 @@ class UserMachineRepository:
     @staticmethod
     def find_machine(machine_id,user_id):
         machine = UserMachine.query.filter_by(machine_id=machine_id, user_id=user_id).first()
+        print("Delinking machinessssssssss ",machine)
         if not machine:
             return 404
         
