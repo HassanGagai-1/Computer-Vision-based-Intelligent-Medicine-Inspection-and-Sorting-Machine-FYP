@@ -1,7 +1,39 @@
 from models.results import Result
 from models.user_machine import UserMachine
 from models.machines import Machine
+
+from models.users import User
+from extensions import db
+import datetime
 class ResultRepository:
+    
+    @staticmethod
+    def join_machine(machine_id, is_deleted,user_id):
+        print("Joining machine repository method called")
+        result = Result(machine_id=machine_id,created_date=datetime.datetime.now(),is_deleted=is_deleted  ,total_strips=0, faulty_strips=0, non_faulty_strips=0)
+        db.session.add(result)
+        db.session.commit()        
+        query = (
+        db.session.query(
+            Result,
+            User.id.label("user_id"),
+            User.firstname.label("user_fname"),
+            Machine.id.label("machine_id"),
+            Machine.machine_code.label("machine_code")
+            ).join(Machine, Machine.id == Result.machine_id)
+            .join(UserMachine, UserMachine.machine_id == Machine.id)
+            .join(User, User.id == UserMachine.user_id)
+            .filter(Result.machine_id == machine_id)
+            .filter(User.id == user_id)
+            .filter(Machine.is_deleted == False)
+            .filter(UserMachine.is_deleted == False)
+            .order_by(Machine.created_date.desc())
+        )        
+        results = query.all()
+        print("Result has been created and joined:", results)
+        return results
+
+    
     @staticmethod
     def get_machine_info(machine_id):
         result = Result.query.filter_by(machine_id=machine_id).first()
@@ -20,22 +52,53 @@ class ResultRepository:
         return machine_ids
     
     @staticmethod
-    def get_total_medicinal_strips(user_machineID):
-        result = Result.query.filter_by(machine_id=user_machineID).first()
+    def find_results_by_user_id(user_id):
+        query = (
+        db.session.query(
+            Result,
+            Machine,
+            User
+        )
+        .join(Machine, Machine.id == Result.machine_id)
+        .join(UserMachine, UserMachine.machine_id == Machine.id)
+        .join(User, User.id == UserMachine.user_id)
+        .filter(User.id == user_id)
+        .filter(Machine.is_deleted == False)
+        .filter(UserMachine.is_deleted == False)
+        .order_by(Result.created_date.desc())
+    )
+    
+        return query.all()
+    
+    @staticmethod
+    def get_total_medicinal_strips(machine_id):
+        print("Calling total medicinal strips")
+        result = Result.query.filter_by(machine_id=machine_id).first()
+        print(f"Query Result of total strips: {result}")
+        if not result:
+            print(f"No Result entry found for machine_id {machine_id}. Returning 0.")
+            return 0    
         medicinal_strips = result.total_strips
         print("Here are medicinal Strips: ", medicinal_strips)
         return medicinal_strips
     
     @staticmethod
-    def get_faulty_strips(user_machineID):
-        result = Result.query.filter_by(machine_id=user_machineID).first()
+    def get_faulty_strips(machine_id):
+        result = Result.query.filter_by(machine_id=machine_id).first()
+        if not result:
+        # No row in 'Result' for this machine, so return 0 or None.
+            print(f"No Result entry found for machine_id {machine_id}. Returning 0.")
+            return 0
         faulty_strips = result.faulty_strips
         print("Here are faulty Strips: ", faulty_strips)
         return faulty_strips
 
     @staticmethod
-    def get_non_faulty_strips(user_machineID):
-        result = Result.query.filter_by(machine_id=user_machineID).first()
-        non_faulty_strips = result.non_faulty_strips
-        print("Here are non-faulty Strips: ", non_faulty_strips)
-        return non_faulty_strips
+    def get_non_faulty_strips(machine_id):
+        result = Result.query.filter_by(machine_id=machine_id).first()
+        if not result:
+        # No row in 'Result' for this machine, so return 0 or None.
+            print(f"No Result entry found for machine_id {machine_id}. Returning 0.")
+            return 0    
+        print("Here are non-faulty Strips: ", result.non_faulty_strips)
+        return result.non_faulty_strips

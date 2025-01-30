@@ -2,6 +2,7 @@ from models.machines import Machine
 from dal.MachineRepository import MachineRepository
 from dal.UserMachineRepository import UserMachineRepository
 from dal.UserRepository import UserRepository
+from dal.ResultRepository import ResultRepository
 import logging
 from extensions import db
 from flask import jsonify
@@ -58,13 +59,16 @@ class MachineService:
             return 401
         else:
             user_machine = UserMachine(user_id=current_user_id, machine_id = machine.id, is_deleted = False)
-            UserMachineRepository.create_user_machine(user_machine)
+            usermachine = UserMachineRepository.create_user_machine(user_machine)
+            print("Linking usermachine", usermachine)
+            
+            result = ResultRepository.join_machine(machine.id,machine.is_deleted,current_user_id)
+            print("We have created a result", result)
             return machine.to_dict()
 
     @staticmethod
-    def get_all_machines():
-        
-        return MachineRepository.get_all_machines()
+    def get_all_machines(created_by):
+        return MachineRepository.get_all_machines(created_by)
     
     def get_by_ID(machine_id,user_id):
         return MachineRepository.find_by_id(machine_id,user_id)

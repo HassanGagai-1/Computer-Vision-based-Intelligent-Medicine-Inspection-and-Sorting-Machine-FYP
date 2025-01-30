@@ -63,7 +63,7 @@ def adminGetAll():
         flash("Please log in first.", "error")
         return redirect('/login')
     logger.debug("Get machines endpoint called")
-    machines = MachineService.get_all_machines()
+    machines = MachineService.get_all_machines(created_by=current_user_id)
     print("Machinesssssss",machines)
     machine_dicts = [   
         {

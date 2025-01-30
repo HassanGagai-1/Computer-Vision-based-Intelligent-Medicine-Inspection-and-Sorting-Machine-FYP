@@ -143,11 +143,11 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="MachineForm" method="POST" action="/addMachine" enctype="application/x-www-form-urlencoded">
+                <form id="MachineForm" method="POST" action="/linkMachine" enctype="application/x-www-form-urlencoded">
                     <label for="machine_code">Machine Code</label>
                     <input name="machine_code" id="machine_code" type="text" class="form-control my-2" required>
-                    <label for="created_by">Created By</label>
-                    <input name="created_by" id="created_by" type="text" class="form-control my-2" required>
+                    <label for="created_by">Machine password</label>
+                    <input name="machine_password" id="machine_password" type="text" class="form-control my-2" required>
                 </form>
             </div>
             <div class="modal-footer">
@@ -334,9 +334,8 @@
               confirmButtonText: "Yes, delete it!"
             }).then((result) => {
               if (result.isConfirmed) {
-                fetch(`/api/deleteMachine?machine_id=${machine_id}`, {
-                  method: "GET",
-                }).then((response) => {
+                fetch(`/delinkMachine/${machine_id}`, { method: "POST" })
+                .then((response) => {
                     // Check if the response is not OK
                     console.log("SHAHAB PAGA:",response);
                     if (!response.ok) {

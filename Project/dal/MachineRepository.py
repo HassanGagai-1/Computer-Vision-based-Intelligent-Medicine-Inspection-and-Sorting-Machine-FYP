@@ -9,7 +9,7 @@ class MachineRepository:
     
     
     @staticmethod
-    def get_all_machines(created_by=None):
+    def get_all_machines(created_by):
         query = (
             db.session.query(
                 Machine.id, 
@@ -20,6 +20,7 @@ class MachineRepository:
             )
             .join(User, User.id == Machine.created_by)
             .filter(Machine.is_deleted == False)
+            .filter(Machine.created_by == created_by)
             .order_by(Machine.created_date.desc())
         )
 
@@ -32,6 +33,9 @@ class MachineRepository:
     def find_by_machine_id(id):
         return Machine.query.filter_by(id=id).first()
 
+    @staticmethod
+    def find_by_machine_code(machine_code):
+        return Machine.query.filter_by(machine_code=machine_code).first()
     
     @staticmethod
     def find_machine_password(machine_password):

@@ -16,7 +16,7 @@ def totalStrips():
     logger.debug("Get Results API CALLED")
     print("Session in getResults:", dict(session))
     current_user_id = session.get('user_id') 
-    print("Session user_id in getResults:", current_user_id)
+    print("Session user_id in getResults:", 1)
     
     results = ResultService.get_total_medicinal_strips(current_user_id)
     print("Results in getResults:", results)
@@ -53,7 +53,7 @@ def generateReport():
         logger.debug(f"No machine found for ID: {machine_id}")
 
     logger.debug("Machine Information: ", result.machine_id)
-    if not result:
+    if not result: 
         return jsonify({"error": "Machine not found"}), 404
     
     buffer = BytesIO()  
@@ -69,6 +69,6 @@ def generateReport():
     pdf.showPage()
     pdf.save()
     buffer.seek(0)
-
+    
     return send_file(buffer, as_attachment=True, download_name=f"Machine_Report_{machine_id}.pdf", mimetype='application/pdf')
 
