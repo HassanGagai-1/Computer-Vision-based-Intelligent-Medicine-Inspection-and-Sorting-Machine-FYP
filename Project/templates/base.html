@@ -17,13 +17,10 @@
     
 
         <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css" rel="stylesheet">
-    
-       
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
-    
-       
-        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+        <!-- Toastr CSS -->
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+
     </head>
     <style>
         .h5, h5 {
@@ -34,18 +31,7 @@
 
     
 <body class="body">
-                    {% with errors = get_flashed_messages(category_filter=["TOTPError"]) %}
-                        {% if errors %}
-                            <div class= "text-center justify-content-center alert alert-primary block-message error">
-                                <a class="close" href="/dashboard">×</a>
-                                <ul>
-                                    {%- for msg in errors %}
-                                        <li>{{ msg }}</li>
-                                    {% endfor -%}
-                                </ul>
-                            </div>
-                        {% endif %}
-                    {% endwith %}
+
     <!-- Main Container -->
 
     
@@ -61,11 +47,11 @@
                 <span class="bi bi-border-all"></span>
                 <span class="ml-2">Dashboard</span>
               </a>
-              <a href="/profile" class="list-group-item list-group-item-action border-0 align-items-center">
-                <span class="bi bi-box"></span>
-                <span class="ml-2">Profile</span>
+              <a href="/live_feed" class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+                <span class="bi bi-border-all"></span>
+                <span class="ml-2">live_feed</span>
               </a>
-      
+              
               <!-- <button class="list-group-item list-group-item-action border-0 d-flex justify-content-between align-items-center" data-toggle="collapse" data-target="#sale-collapse">
                 <div>
                   <span class="bi bi-cart-dash"></span>
@@ -143,7 +129,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="MachineForm" method="POST" action="/linkMachine" enctype="application/x-www-form-urlencoded">
+                <form id="MachineForm"  method="POST" action="/linkMachine" enctype="application/x-www-form-urlencoded">
                     <label for="machine_code">Machine Code</label>
                     <input name="machine_code" id="machine_code" type="text" class="form-control my-2" required>
                     <label for="created_by">Machine password</label>
@@ -159,51 +145,108 @@
 </div>
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <script>
+    $(document).ready(function() {
+      // Toastr options
+      toastr.options = {
+        'closeButton': true,
+        'debug': false,
+        'newestOnTop': false,
+        'progressBar': false,
+        'positionClass': 'toast-top-right',
+        'preventDuplicates': false,
+        'showDuration': '1000',
+        'hideDuration': '1000',
+        'timeOut': '5000',
+        'extendedTimeOut': '1000',
+        'showEasing': 'swing',
+        'hideEasing': 'linear',
+        'showMethod': 'fadeIn',
+        'hideMethod': 'fadeOut',
+      };
+      {% for category, message in messages %}
+      // Make sure your flash categories match toastr types:
+      // e.g., flash("Your message", "success") will call toastr.success(...)
+      toastr["{{ category }}"]("{{ message }}");
+    {% endfor %}
+    });
+  </script>
+  {% endif %}
+{% endwith %}
 <script>
-    $(document).ready(()=>{
-  $('#open-sidebar').click(()=>{
-      // add class active on #sidebar
-      $('#sidebar').addClass('active');
-      // show sidebar overlay
-      $('#sidebar-overlay').removeClass('d-none');
-   });
-   $('#sidebar-overlay').click(function(){
-      // add class active on #sidebar
-      $('#sidebar').removeClass('active');
-      // show sidebar overlay
-      $(this).addClass('d-none');
-   });
-});
-</script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const machineForm = document.getElementById('MachineForm');
+    
+    machineForm.addEventListener('submit', async (event) => {
+      event.preventDefault(); // stop the normal form submission
+  
+      const formData = new FormData(machineForm);
+      const machine_code = formData.get('machine_code');
+      const machine_password = formData.get('machine_password');
+  
+      try {
+        // Send JSON POST request to your Flask endpoint
+        const response = await fetch("/linkMachine", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ machine_code, machine_password }),
+          credentials: 'include'  // Send cookies/session data
+        });
+  
+        // If not OK, parse the error message and show an alert
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(errorData.error || "An unknown error occurred.");
+          return;  // stop here
+        }
+  
+        // If response is OK, parse success message
+        const successData = await response.json(); 
+        // e.g. { "message": "Machine linked successfully" }
+        alert(successData.message || "Machine linked successfully!");
+  
+        // Optionally close your modal and refresh machine list
+        $('#addMachineModal').modal('hide');
+        fetchMachines();
+  
+      } catch (error) {
+        console.error("Error linking machine:", error);
+            }
+    });
+  });
+  </script>
     <script>
         
         async function fetchresults(){
             try{
-                const response = await fetch(`/api/totalStrips`);
-                const response2 = await fetch(`/api/faultyStrips`);
-                const response3 = await fetch(`/api/nonFaultyStrips`);
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-                if (!response2.ok) {
-                    throw new Error(`Server error: ${response2.status}`);
-                }
-                if (!response3.ok) {
-                    throw new Error(`Server error: ${response3.status}`);
-                }
-            
-            
-            const total_medicinal_strips = await response.json();
-            const total_faulty_strips = await response2.json();
-            const total_non_faulty_strips = await response3.json();
-
-            console.log("Fetched results:", total_medicinal_strips);
-            totalStrips(total_medicinal_strips);
-            totalFaultyStrips(total_faulty_strips,total_medicinal_strips);
-            totalNonFaultyStrips(total_non_faulty_strips,total_medicinal_strips);
+              const [totalResponse, faultyResponse, nonFaultyResponse] = await Promise.all([
+                fetch(`/api/totalStrips`),
+                fetch(`/api/faultyStrips`),
+                fetch(`/api/nonFaultyStrips`)
+              ]);
+      
+              if (!totalResponse.ok || !faultyResponse.ok || !nonFaultyResponse.ok) {
+                throw new Error('One or more fetch requests failed');
+              }
+      
+              const total_medicinal_strips = await totalResponse.json();
+              const total_faulty_strips = await faultyResponse.json();
+              const total_non_faulty_strips = await nonFaultyResponse.json();
+      
+              // Update your UI
+              totalStrips(total_medicinal_strips);
+              totalFaultyStrips(total_faulty_strips, total_medicinal_strips);
+              totalNonFaultyStrips(total_non_faulty_strips, total_medicinal_strips);
 
         } catch (error) {
             console.error("Error fetching results data:", error);
@@ -381,6 +424,5 @@
         }
         
     </script>
-    
 </body>
 </html>

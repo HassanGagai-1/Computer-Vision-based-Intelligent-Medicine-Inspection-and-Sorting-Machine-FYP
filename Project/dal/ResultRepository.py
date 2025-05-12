@@ -1,6 +1,7 @@
 from models.results import Result
 from models.user_machine import UserMachine
 from models.machines import Machine
+from sqlalchemy import func
 
 from models.users import User
 from extensions import db
@@ -46,6 +47,7 @@ class ResultRepository:
         machine_ids = [um.machine_id for um in user_machines]
         machines = Machine.query.filter(Machine.id.in_(machine_ids)).all()
 
+        print(f"Here are all the machine_ids relation: {machine_ids}")
         print(f"All User-Machine Relations: {user_machines}")
         print(f"All Machines Assigned to User {user_id}: {machines}")
         
@@ -69,36 +71,26 @@ class ResultRepository:
     )
     
         return query.all()
+
     
     @staticmethod
-    def get_total_medicinal_strips(machine_id):
-        print("Calling total medicinal strips")
-        result = Result.query.filter_by(machine_id=machine_id).first()
-        print(f"Query Result of total strips: {result}")
-        if not result:
-            print(f"No Result entry found for machine_id {machine_id}. Returning 0.")
-            return 0    
-        medicinal_strips = result.total_strips
-        print("Here are medicinal Strips: ", medicinal_strips)
-        return medicinal_strips
+    def get_total_medicinal_strips(machine_ids):
+        total = db.session.query(func.sum(Result.total_strips))\
+            .filter(Result.machine_id.in_(machine_ids), Result.is_deleted == False)\
+            .scalar() or 0
+        return total
+
     
     @staticmethod
-    def get_faulty_strips(machine_id):
-        result = Result.query.filter_by(machine_id=machine_id).first()
-        if not result:
-        # No row in 'Result' for this machine, so return 0 or None.
-            print(f"No Result entry found for machine_id {machine_id}. Returning 0.")
-            return 0
-        faulty_strips = result.faulty_strips
-        print("Here are faulty Strips: ", faulty_strips)
-        return faulty_strips
+    def get_faulty_strips(machine_ids):
+        total = db.session.query(func.sum(Result.faulty_strips))\
+        .filter(Result.machine_id.in_(machine_ids), Result.is_deleted == False)\
+        .scalar() or 0
+        return total 
 
     @staticmethod
-    def get_non_faulty_strips(machine_id):
-        result = Result.query.filter_by(machine_id=machine_id).first()
-        if not result:
-        # No row in 'Result' for this machine, so return 0 or None.
-            print(f"No Result entry found for machine_id {machine_id}. Returning 0.")
-            return 0    
-        print("Here are non-faulty Strips: ", result.non_faulty_strips)
-        return result.non_faulty_strips
+    def get_non_faulty_strips(machine_ids):
+        total = db.session.query(func.sum(Result.non_faulty_strips))\
+        .filter(Result.machine_id.in_(machine_ids), Result.is_deleted == False)\
+        .scalar() or 0
+        return total

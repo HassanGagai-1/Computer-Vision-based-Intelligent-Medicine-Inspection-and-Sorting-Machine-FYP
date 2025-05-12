@@ -1,27 +1,36 @@
 from dotenv import load_dotenv, find_dotenv
 from routes.UserRoutes import user_bp
+from ultralytics import YOLO
 from routes.MachineRoutes import machine_bp
 from routes.UserMachineRoutes import user_machine_bp
 from routes.ResultRoutes import result_bp
+from routes.live_feed import live_feed_bp
 from models.roles import Role
 from extensions import db
 from datetime import timedelta
 import logging
 from flask import Flask, Blueprint, render_template, request, redirect, url_for, flash, session ,jsonify
-from services.UserService import UserService
-from flask import render_template
 import os
 from flask_session import Session
 from flask_migrate import Migrate
+from PIL import Image
+from flask_cors import CORS
+import numpy as np
+import torch
+
 
 logger = logging.getLogger(__name__)
+
+
+app = Flask(__name__)
+CORS(app)
+
 
 def create_app():    
     logging.basicConfig(
     level=logging.DEBUG,               # minimum severity level to log
     format='%(asctime)s %(levelname)s %(name)s:%(lineno)d - %(message)s'                
     )
-
     load_dotenv(find_dotenv())
     app = Flask(__name__)
     
@@ -40,6 +49,7 @@ def create_app():
     
     Session(app)  
 
+
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['MAIL_DEBUG'] = True
 
@@ -55,8 +65,10 @@ def create_app():
     app.register_blueprint(machine_bp)  
     app.register_blueprint(user_machine_bp)
     app.register_blueprint(result_bp)
+    # app.register_blueprint(prediction_bp) 
+    app.register_blueprint(live_feed_bp)
     return app
     
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

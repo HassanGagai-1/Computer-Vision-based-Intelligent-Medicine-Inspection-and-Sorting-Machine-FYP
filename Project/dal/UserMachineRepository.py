@@ -2,7 +2,7 @@ from extensions import db
 from models.user_machine import UserMachine
 from models.users import User
 from models.machines import Machine
-
+from models.results import Result
 class UserMachineRepository:
     
     @staticmethod
@@ -48,6 +48,12 @@ class UserMachineRepository:
         db.session.commit()
     
     @staticmethod
+    def find_machine_exist(machine_id,user_id):
+        machine = UserMachine.query.filter_by(machine_id=machine_id, user_id=user_id).first()
+        print("Find machine exist",machine)
+        return machine
+    
+    @staticmethod
     def find_machine(machine_id,user_id):
         machine = UserMachine.query.filter_by(machine_id=machine_id, user_id=user_id).first()
         print("Delinking machinessssssssss ",machine)
@@ -55,6 +61,7 @@ class UserMachineRepository:
             return 404
         
         machine.is_deleted = True
+        Result.query.filter_by(machine_id=machine_id).update({"is_deleted": True})
         db.session.commit()
         return machine
         

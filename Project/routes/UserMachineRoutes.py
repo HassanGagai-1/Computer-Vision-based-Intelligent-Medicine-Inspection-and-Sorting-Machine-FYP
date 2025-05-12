@@ -7,7 +7,6 @@ from flask import render_template
 import logging
 from models.users import User
 from io import BytesIO
-from reportlab.pdfgen import canvas
 
 
 logger = logging.getLogger(__name__)
@@ -22,7 +21,6 @@ def getAdminMachines():
     machine_dicts = [m.to_dict() for m in machines]
     
     return jsonify(machine_dicts),200
-
 
 
 @user_machine_bp.route('/api/getUserMachines', methods=['GET'])
@@ -56,9 +54,9 @@ def delinkMachine(machine_id):
             response = UserMachineService.delink_machine(machine_id,user_id)
             if response == 404:
                 flash("Machine not found", "error")
-                return jsonify({"error": "Machine not found"}), 404
+                return jsonify({'status': 400, 'message' : 'Machine not found'}),400
             else:
-                return render_template('dashboard.html')
+                return jsonify({'status': 200, 'message' : 'Machine delinked Successfully'}),200
         except ValueError as e:
             flash(str(e), "error")
             return jsonify({"error": str(e)}), 400
@@ -71,13 +69,10 @@ def linkMachine():
     if request.method == 'GET':
         return render_template('dashboard.html')
     if request.method == 'POST':
-        # machine_code = request.form.get('machine_code')
-        # current_user_id = session.get('user_id')
-        # machine_password = request.form.get('machine_password')
         data = request.get_json()
-        current_user_id = data.get('user_id')
         machine_code = data.get('machine_code')
         machine_password = data.get('machine_password')
+        current_user_id = session.get('user_id')
         if not current_user_id:
             flash("Please log in first.", "error")
             return redirect('/login')
@@ -92,8 +87,11 @@ def linkMachine():
                 flash("Invalid Machine Password", "error")
                 return jsonify({"error": "Invalid Machine Password"}), 403
             elif response == 401:
-                return jsonify({"error": "Machine has been deleted"}), 401
-            else:
+                flash("Invalid Machine Password")
+                return jsonify({"error": "Machine has already been deleted"}), 401
+            elif response == 402:
+                return jsonify({"error": "Machine does not exist"}),402
+            else:   
                 return redirect('/dashboard')
         except ValueError as e:
             flash(str(e), "error")

@@ -759,6 +759,7 @@ def getUserProfile():
 
 @user_bp.route('/profile', methods=['GET'])
 def profile():
+    
     user_id = session.get('user_id')
     if not user_id:
         return redirect('/login')

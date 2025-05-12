@@ -55,16 +55,19 @@ class MachineService:
             return 404
         elif machine.machine_password != machine_password:
             return 403
-        elif machine.is_deleted == True:
-            return 401
-        else:
+        user_machine = UserMachineRepository.find_machine_exist(machine.id,current_user_id)
+        
+        if not user_machine:
             user_machine = UserMachine(user_id=current_user_id, machine_id = machine.id, is_deleted = False)
             usermachine = UserMachineRepository.create_user_machine(user_machine)
+            
             print("Linking usermachine", usermachine)
             
             result = ResultRepository.join_machine(machine.id,machine.is_deleted,current_user_id)
             print("We have created a result", result)
             return machine.to_dict()
+        else:
+            return 404
 
     @staticmethod
     def get_all_machines(created_by):
