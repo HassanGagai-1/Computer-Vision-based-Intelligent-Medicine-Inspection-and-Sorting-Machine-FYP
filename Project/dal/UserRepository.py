@@ -10,12 +10,6 @@ class UserRepository:
         else:
             print(f"No user found for email {email}")
         return user
-
-    @staticmethod
-    def reset_token(user,reset_token,reset_token_expiry):
-        user.reset_token = reset_token
-        user.reset_token_expiry = reset_token_expiry
-        db.session.commit()
     
     @staticmethod
     def create_user(user):
@@ -30,6 +24,18 @@ class UserRepository:
             return user
         else:
             print(f"No user found for id {user_id}")
+            
+    @staticmethod
+    def find_user_name_by_id(user_id):
+        user = db.session.query(User.firstname, User.lastname).filter(User.id == user_id).first()
+        
+        if user:
+            print(f"User found for id {user_id}: {user.firstname} {user.lastname}")
+            return user
+        else:
+            print(f"No user found for id {user_id}")
+            return None
+
     
     @staticmethod
     def update_user_detail(user, firstname, lastname, email):

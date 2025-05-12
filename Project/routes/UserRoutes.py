@@ -4,7 +4,6 @@ from flask import render_template
 from models.users import User
 import logging
 from extensions import db
-from services.totp_service import generate_totp_secret, get_totp_uri,verify_totp_code
 import os
 from itsdangerous import URLSafeTimedSerializer as Serializer
 
@@ -14,7 +13,7 @@ user_bp = Blueprint('user', __name__)
 @user_bp.route('/', methods=['GET'])
 def home():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('user.login'))
     else:
 	    return render_template('dashboard.html')
 
@@ -28,6 +27,34 @@ def dashboard():
     else:
 	    return render_template('dashboard.html')
 
+@user_bp.route('/admin_dashboard', methods=['GET'])
+def admin_dashboard():
+    print("Current session:", session)
+    print("Session get user_ID: ",session.get('user_id'))
+    if 'user_id' not in session:
+        return redirect(url_for('user.login'))
+    else:
+        return render_template('add_machine.html',addmachineClass='active',viewmachineClass='Not')
+
+@user_bp.route('/add_machine', methods=['GET'])
+def add_machine():
+    print("Current session:", session)
+    print("Session get user_ID: ",session.get('user_id'))
+    if 'user_id' not in session:
+        return redirect(url_for('user.login'))
+    else:
+        return render_template('add_machine.html',addmachineClass='active',viewmachineClass='Not')
+    
+@user_bp.route('/view_machine', methods=['GET'])
+def view_machine():
+    print("Current session:", session)
+    print("Session get user_ID: ",session.get('user_id'))
+    if 'user_id' not in session:
+        return redirect(url_for('user.login'))
+    else:
+        return render_template('view_machine.html',addmachineClass='not',viewmachineClass='active')
+
+
 @user_bp.route('/register', methods=['POST','GET'])
 def register():
     logger.debug("UserRoutes.register endpoint called")
@@ -40,9 +67,371 @@ def register():
         password = request.form.get('password')
         
         UserService.register_user(firstname, lastname, email, password)
-        return redirect(url_for('login'))
+        if request.method == 'POST':
+            Uemail = request.form.get("email", False)
+            print("User mail is", Uemail)
+            # print("HTML Content:", HTML_CONTENT)
+            reset_url = url_for('user.login', _external=True, _scheme='http')
+            HTML_CONTENT = f'''
+                        <html>
+                        <head>
+                            <title></title>
+                            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+                            <meta name="viewport" content="width=device-width, initial-scale=1">
+                            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+                            <style type="text/css">
+                                /* FONTS */
+                                @media screen {{
+                                    @font-face {{
+                                        font-family: 'Lato';
+                                        font-style: normal;
+                                        font-weight: 400;
+                                        src: local('Lato Regular'), local('Lato-Regular'),
+                                        url(https://fonts.gstatic.com/s/lato/v11/qIIYRU-oROkIk8vfvxw6QvesZW2xOQ-xsNqO47m55DA.woff) format('woff');
+                                    }}
+                                    @font-face {{
+                                        font-family: 'Lato';
+                                        font-style: normal;
+                                        font-weight: 700;
+                                        src: local('Lato Bold'), local('Lato-Bold'),
+                                        url(https://fonts.gstatic.com/s/lato/v11/qdgUG4U09HnJwhYI-uK18wLUuEpTyoUstqEm5AMlJo4.woff) format('woff');
+                                    }}
+                                    @font-face {{
+                                        font-family: 'Lato';
+                                        font-style: italic;
+                                        font-weight: 400;
+                                        src: local('Lato Italic'), local('Lato-Italic'),
+                                        url(https://fonts.gstatic.com/s/lato/v11/RYyZNoeFgb0l7W3Vu1aSWOvvDin1pK8aKteLpeZ5c0A.woff) format('woff');
+                                    }}
+                                    @font-face {{
+                                        font-family: 'Lato';
+                                        font-style: italic;
+                                        font-weight: 700;
+                                        src: local('Lato Bold Italic'), local('Lato-BoldItalic'),
+                                        url(https://fonts.gstatic.com/s/lato/v11/HkF_qI1x_noxlxhrhMQYELO3LdcAZYWl9Si6vvxL-qU.woff) format('woff');
+                                    }}
+                                }}
+                                /* CLIENT-SPECIFIC STYLES */
+                                body, table, td, a {{
+                                    -webkit-text-size-adjust: 100%;
+                                    -ms-text-size-adjust: 100%;
+                                }}
+                                table, td {{
+                                    mso-table-lspace: 0pt;
+                                    mso-table-rspace: 0pt;
+                                }}
+                                img {{
+                                    -ms-interpolation-mode: bicubic;
+                                }}
+                                /* RESET STYLES */
+                                img {{
+                                    border: 0;
+                                    height: auto;
+                                    line-height: 100%;
+                                    outline: none;
+                                    text-decoration: none;
+                                }}
+                                table {{
+                                    border-collapse: collapse !important;
+                                }}
+                                body {{
+                                    height: 100% !important;
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                    width: 100% !important;
+                                }}
+                                /* iOS BLUE LINKS */
+                                a[x-apple-data-detectors] {{
+                                    color: inherit !important;
+                                    text-decoration: none !important;
+                                    font-size: inherit !important;
+                                    font-family: inherit !important;
+                                    font-weight: inherit !important;
+                                    line-height: inherit !important;
+                                }}
+                                /* ANDROID CENTER FIX */
+                                div[style*="margin: 16px 0;"] {{
+                                    margin: 0 !important;
+                                }}
+                            </style>
+                        </head>
+                        <body style="background-color: #f4f4f4; margin: 0 !important; padding: 0 !important;">
+                            <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: 'Lato', Helvetica, Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">Hi!</div>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tbody>
+                                    <tr>
+                                        <td bgcolor="#C62B5B" align="center">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                                <tbody>
+                                                    <tr>
+                                                        <td align="center" valign="top" style="padding: 40px 10px 40px 10px;">
+                                                            <a href="https://pifs.lts.com.fj" target="_blank"></a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td bgcolor="#C62B5B" align="center" style="padding: 0px 10px 0px 10px;">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                                <tbody>
+                                                    <tr>
+                                                        <td bgcolor="#ffffff" align="center" valign="top" style="padding: 40px 20px 20px 20px; border-radius: 4px 4px 0px 0px; color: #111111; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 48px; font-weight: 400; letter-spacing: 4px; line-height: 48px;">
+                                                            <h1 style="font-size: 32px; font-weight: 400; margin: 0;">Is this you who have registered?</h1>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td bgcolor="#f4f4f4" align="center" style="padding: 0px 10px 0px 10px;">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                                <tbody>
+                                                    <tr>
+                                                        <td bgcolor="#ffffff" align="left" style="padding: 20px 30px 40px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
+                                                            <p style="margin: 0;">Hey {Uemail},<br><br>Please tap the button<br><br>If you this isn't your email, don't worry. Just ignore this email and the link will expire on its own.<br><br>Have a nice day.<br>Stay Safe!<br></p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td bgcolor="#ffffff" align="left">
+                                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td bgcolor="#ffffff" align="center" style="padding: 20px 30px 60px 30px;">
+                                                                            <table border="0" cellspacing="0" cellpadding="0">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td align="center" style="border-radius: 3px;" bgcolor="#C62B5B">
+                                                                                        <a href="{reset_url}" target="_blank" style="font-size: 20px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 15px 25px; border-radius: 2px; border: 1px solid #C62B5B; display: inline-block;">
+                                                                                        Login</a>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td bgcolor="#f4f4f4" align="center" style="padding: 16px 10px 0px 10px;">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                                <tbody>
+                                                    <tr>
+                                                        <td bgcolor="#f4f4f4" align="left" style="padding: 0px 30px 16px 30px;color: #666666;font-family: 'Lato', Helvetica, Arial, sans-serif;font-size: 14px;font-weight: 400;line-height: 18px;">
+                                                            <p style="margin: 0;">You received this email because your account password is being resetted</p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td bgcolor="#f4f4f4" align="left" style="padding: 0px 30px 30px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; line-height: 18px;">
+                                                            <p style="margin: 0;">Suite # 6B-3/4, 6th Floor, Fakhri Trade Center, Shahra-e-Liaquat, KHI</p>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </body>
+                        </html>
+                    '''
+
+            UserService.send_email(Uemail, 'Verification mail sent', HTML_CONTENT)
+            flash('Reset email sent Successfully!', 'success')
+            return redirect(url_for('user.login'))
     except ValueError as e:
         return render_template('signup.html', error=str(e)), 400
+
+@user_bp.route('/api/verificationMail', methods=['GET', 'POST'])
+def verification_mail():
+    if request.method == 'POST':
+        Uemail = request.form.get("email", False)
+        print("User mail is", Uemail)
+        # print("HTML Content:", HTML_CONTENT)
+        reset_url = url_for('user.login', _external=True, _scheme='http')
+               
+        HTML_CONTENT = f'''
+                    <html>
+                    <head>
+                        <title></title>
+                        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+                        <style type="text/css">
+                            /* FONTS */
+                            @media screen {{
+                                @font-face {{
+                                    font-family: 'Lato';
+                                    font-style: normal;
+                                    font-weight: 400;
+                                    src: local('Lato Regular'), local('Lato-Regular'),
+                                    url(https://fonts.gstatic.com/s/lato/v11/qIIYRU-oROkIk8vfvxw6QvesZW2xOQ-xsNqO47m55DA.woff) format('woff');
+                                }}
+                                @font-face {{
+                                    font-family: 'Lato';
+                                    font-style: normal;
+                                    font-weight: 700;
+                                    src: local('Lato Bold'), local('Lato-Bold'),
+                                    url(https://fonts.gstatic.com/s/lato/v11/qdgUG4U09HnJwhYI-uK18wLUuEpTyoUstqEm5AMlJo4.woff) format('woff');
+                                }}
+                                @font-face {{
+                                    font-family: 'Lato';
+                                    font-style: italic;
+                                    font-weight: 400;
+                                    src: local('Lato Italic'), local('Lato-Italic'),
+                                    url(https://fonts.gstatic.com/s/lato/v11/RYyZNoeFgb0l7W3Vu1aSWOvvDin1pK8aKteLpeZ5c0A.woff) format('woff');
+                                }}
+                                @font-face {{
+                                    font-family: 'Lato';
+                                    font-style: italic;
+                                    font-weight: 700;
+                                    src: local('Lato Bold Italic'), local('Lato-BoldItalic'),
+                                    url(https://fonts.gstatic.com/s/lato/v11/HkF_qI1x_noxlxhrhMQYELO3LdcAZYWl9Si6vvxL-qU.woff) format('woff');
+                                }}
+                            }}
+                            /* CLIENT-SPECIFIC STYLES */
+                            body, table, td, a {{
+                                -webkit-text-size-adjust: 100%;
+                                -ms-text-size-adjust: 100%;
+                            }}
+                            table, td {{
+                                mso-table-lspace: 0pt;
+                                mso-table-rspace: 0pt;
+                            }}
+                            img {{
+                                -ms-interpolation-mode: bicubic;
+                            }}
+                            /* RESET STYLES */
+                            img {{
+                                border: 0;
+                                height: auto;
+                                line-height: 100%;
+                                outline: none;
+                                text-decoration: none;
+                            }}
+                            table {{
+                                border-collapse: collapse !important;
+                            }}
+                            body {{
+                                height: 100% !important;
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                width: 100% !important;
+                            }}
+                            /* iOS BLUE LINKS */
+                            a[x-apple-data-detectors] {{
+                                color: inherit !important;
+                                text-decoration: none !important;
+                                font-size: inherit !important;
+                                font-family: inherit !important;
+                                font-weight: inherit !important;
+                                line-height: inherit !important;
+                            }}
+                            /* ANDROID CENTER FIX */
+                            div[style*="margin: 16px 0;"] {{
+                                margin: 0 !important;
+                            }}
+                        </style>
+                    </head>
+                    <body style="background-color: #f4f4f4; margin: 0 !important; padding: 0 !important;">
+                        <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: 'Lato', Helvetica, Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">Hi!</div>
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                                <tr>
+                                    <td bgcolor="#C62B5B" align="center">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                            <tbody>
+                                                <tr>
+                                                    <td align="center" valign="top" style="padding: 40px 10px 40px 10px;">
+                                                        <a href="https://pifs.lts.com.fj" target="_blank"></a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td bgcolor="#C62B5B" align="center" style="padding: 0px 10px 0px 10px;">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                            <tbody>
+                                                <tr>
+                                                    <td bgcolor="#ffffff" align="center" valign="top" style="padding: 40px 20px 20px 20px; border-radius: 4px 4px 0px 0px; color: #111111; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 48px; font-weight: 400; letter-spacing: 4px; line-height: 48px;">
+                                                        <h1 style="font-size: 32px; font-weight: 400; margin: 0;">Is this you who have registered?</h1>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td bgcolor="#f4f4f4" align="center" style="padding: 0px 10px 0px 10px;">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                            <tbody>
+                                                <tr>
+                                                    <td bgcolor="#ffffff" align="left" style="padding: 20px 30px 40px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
+                                                        <p style="margin: 0;">Hey {Uemail},<br><br>Please tap the button<br><br>If you this isn't your email, don't worry. Just ignore this email and the link will expire on its own.<br><br>Have a nice day.<br>Stay Safe!<br></p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td bgcolor="#ffffff" align="left">
+                                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td bgcolor="#ffffff" align="center" style="padding: 20px 30px 60px 30px;">
+                                                                        <table border="0" cellspacing="0" cellpadding="0">
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td align="center" style="border-radius: 3px;" bgcolor="#C62B5B">
+                                                                                    <a href="{reset_url}" target="_blank" style="font-size: 20px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 15px 25px; border-radius: 2px; border: 1px solid #C62B5B; display: inline-block;">
+                                                                                    Login</a>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td bgcolor="#f4f4f4" align="center" style="padding: 16px 10px 0px 10px;">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="480">
+                                            <tbody>
+                                                <tr>
+                                                    <td bgcolor="#f4f4f4" align="left" style="padding: 0px 30px 16px 30px;color: #666666;font-family: 'Lato', Helvetica, Arial, sans-serif;font-size: 14px;font-weight: 400;line-height: 18px;">
+                                                        <p style="margin: 0;">You received this email because your account password is being resetted</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td bgcolor="#f4f4f4" align="left" style="padding: 0px 30px 30px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; line-height: 18px;">
+                                                        <p style="margin: 0;">Suite # 6B-3/4, 6th Floor, Fakhri Trade Center, Shahra-e-Liaquat, KHI</p>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </body>
+                    </html>
+                '''
+               
+        UserService.send_email(Uemail, 'Verification mail sent', HTML_CONTENT)
+        flash('Reset email sent Successfully!', 'success')
+        return redirect(url_for('user.login'))
+    return render_template('register.html')
 
 @user_bp.route('/login', methods=['POST','GET'])
 def login():
@@ -52,18 +441,20 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
         logger.info('User login attempt')
-
+        
         if not email or not password:
             flash('Invalid email or password', 'error')
             return render_template('login.html', error='Invalid email or password'), 400
 
         try:
             user = UserService.login_user(email, password)
-            session.permanent = True
             session['user_id'] = user.id
             session.modified = True
             print("Session after login:", dict(session))
-            return redirect(url_for('user.dashboard'))
+            if user.role_id == 2:
+                return redirect(url_for('user.dashboard'))
+            else:
+                return redirect(url_for('user.admin_dashboard'))
 
         except ValueError:
             flash('Invalid credentials', 'error')
@@ -265,7 +656,6 @@ def forgetPass():
                     </body>
                     </html>
                 '''
-               
                 UserService.send_email(Uemail, 'Password Reset', HTML_CONTENT)
                 print(token)
                 flash('Reset email sent Successfully!', 'success')
@@ -325,18 +715,13 @@ def changepass():
 
         
         if new_password == re_new_password:
+            
             UserService.changepassword(user_mail, new_password)
             return render_template('changepass.html', changed=True)
         else:
             return render_template('changepass.html', unchanged=True)
 
     return render_template('changepass.html', form=True)
-
-
-    
-    
-    
-
 
 
 def verify_secret_token(token):
@@ -374,48 +759,10 @@ def getUserProfile():
 
 @user_bp.route('/profile', methods=['GET'])
 def profile():
+    
     user_id = session.get('user_id')
     if not user_id:
         return redirect('/login')
     User.query.get(user_id)
     return render_template('profile.html')
-
-@user_bp.route('/enable_totp/<int:user_id>', methods=['POST','GET'])
-def enable_totp(user_id):
-    """Admin route to enable TOTP for a user and return a QR code for scanning."""
-    user = User.query.get(user_id)
-    
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-    
-    secret = generate_totp_secret()
-    user.totp_secret = secret
-    db.session.commit()
-
-@user_bp.route('/verify_totp', methods=['POST'])
-def verify_totp():
-    """Route that verifies the TOTP code the user typed in."""
-    
-    user_id = session.get('user_id')
-    
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
-    
-    code = request.form.get('totp_code')
-    
-    if not code:
-        return jsonify({"error": "TOTP code is required"}), 400
-    
-    user = User.query.get(user_id)
-    
-    if not user or not user.totp_secret:
-        return jsonify({"error": "User not found or TOTP not enabled."}), 400
-
-    if verify_totp_code(user.totp_secret, code):
-        session['totp_verified'] = True
-        flash("TOTP verification successful", "verified")
-        return render_template('dashboard.html')
-    else:
-        flash("Invalid TOTP code", "TOTPError")
-        return render_template('dashboard.html')
 
