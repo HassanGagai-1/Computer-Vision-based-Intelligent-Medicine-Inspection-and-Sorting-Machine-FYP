@@ -4,7 +4,7 @@ from ultralytics import YOLO
 from routes.MachineRoutes import machine_bp
 from routes.UserMachineRoutes import user_machine_bp
 from routes.ResultRoutes import result_bp
-from routes.live_feed import live_feed_bp
+# from routes.live_feed import live_feed_bp
 from models.roles import Role
 from extensions import db
 from datetime import timedelta
@@ -66,7 +66,7 @@ def create_app():
     app.register_blueprint(user_machine_bp)
     app.register_blueprint(result_bp)
     # app.register_blueprint(prediction_bp) 
-    app.register_blueprint(live_feed_bp)
+    # app.register_blueprint(live_feed_bp)
     return app
     
 if __name__ == '__main__':

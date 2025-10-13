@@ -20,7 +20,6 @@ def totalStrips():
     
     results = ResultService.get_total_medicinal_strips(current_user_id)
     print("Results in getResults:", results)
-
     
     return jsonify(results), 200
 
